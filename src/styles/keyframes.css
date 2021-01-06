@@ -1,0 +1,82 @@
+/* cursor blink */
+
+@keyframes blink{
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+@-webkit-keyframes blink{
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+@-moz-keyframes blink{
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+
+/* fade up animation */
+
+@keyframes fadeUp{
+    0% { 
+        transform: translateY(100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@-webkit-keyframes fadeUp{
+    0% { 
+        transform: translateY(100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@-moz-keyframes fadeUp{
+    0% { 
+        transform: translateY(100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* Lighting up */
+
+@keyframes lightUp{
+    0%{
+        filter: brightness(0);
+    }
+}
+
+@-webkit-keyframes lightUp{
+    0%{
+        filter: brightness(0);
+    }
+}
+
+@-moz-keyframes lightUp{
+    0%{
+        filter: brightness(0);
+    }
+}
+
+/* clouds and sun frames */
+
+@keyframes cl-sun{
+    0%{
+        transform: translateY(200%);
+        opacity: 0;
+    }
+    50%{
+        transform: translateY(200%);
+        opacity: 0;
+    }
+    100%{
+        transform: translateY(0);
+    }
+}
