@@ -622,3 +622,222 @@ body {
     background-color: #000;
     color: #ffffff;
 }
+
+@media only screen and (max-width: 1440px){
+    .med-hill {
+        bottom: 10%;
+    }
+    
+    #introduction {
+        padding: 150px 0  50px;
+    }
+    
+    #skills {
+        padding: 0 0 200px;
+    }
+    
+    .knowme-logo .logo-title {
+        font-size: 40px;
+    }
+    
+    .knowme-title {
+        font-size: 75px;
+    }
+    
+    .works-wrap {
+        width: 75%;
+    }
+}
+
+@media only screen and (max-width: 1200px){
+    .knowme-logo .logo-title {
+        font-size: 22px;
+    }
+}
+
+@media only screen and (max-width: 1024px){
+    .side-hill {
+        bottom: 10%;
+    }
+    
+    .intro-paragraph {
+        width: 75%;
+    }
+    
+    .knowme-title {
+        font-size: 65px;
+    }
+    
+    #knowme {
+        padding: 150px 100px;
+    }
+    
+    .works-wrap {
+        width: 90%;
+    }
+}
+
+@media only screen and (max-width: 768px){
+    #mouse-circle{
+        display: none;
+    }
+
+    .skills-wrap {
+        padding: 0 10px;
+        width: 7%;
+    }
+    
+    #knowme {
+        padding: 150px 100px  50px;
+    }
+    
+    .knowme-title-wrap {
+        position: unset;
+        float: unset;
+        width: 100%;
+        margin-bottom: 50px;
+    }
+    
+    .knowme-obj-wrap {
+        width: 100%;
+    }
+    
+    #works {
+        padding-top: 50px;
+    }
+    
+    .works-header {
+        width: 75%;
+        margin: 0 auto;
+    }
+    
+    .works-wrap .col {
+        border: 0;
+        padding-bottom: 0;
+        padding-top: 0;
+    }
+    
+    .work-obj {
+        width: 75%;
+        display: block;
+        margin: 0 auto;
+        margin-bottom: 80px;
+        padding: 0;
+    }
+    
+    
+    #socials {
+        padding: 100px 0 150px;
+    }
+    
+    .works-wrap {
+        padding-top: 75px;
+    }
+}
+
+@media only screen and (max-width: 425px){
+    .switch-container {
+        padding-top: 25px;
+    }
+
+    .typing-animation {
+        font-size: 3rem;
+        width: 85%;
+        margin: 0 auto;
+    }
+    
+    .cloud-1 {
+        left: -10%;
+    }
+    
+    .cl-sun {
+        right: 35%;
+    }
+    
+    .light-mountain {
+        bottom: 15%;
+    }
+    
+    .side-hill {
+        bottom: 14%;
+    }
+    
+    .med-hill {
+        bottom: 10%;
+    }
+    
+    .bottom-hill {
+        bottom: 4%;
+    }
+    
+    .light-pines {
+        width: 145vh;
+        bottom: -14%;
+        left: -31%;
+    }
+
+    .dark-pines {
+        width: 145vh;
+        bottom: -15%;
+    }
+    
+    .sun {
+        width: 75px;
+    }
+    
+    .moon {
+        width: 75px;
+    }
+    
+    #knowme {
+        padding: 100px 20px 50px;
+    }
+    
+    .knowme-title {
+        font-size: 45px;
+    }
+    
+    .knowme-texts {
+        padding: 25px 0;
+    }
+    
+    .works-header {
+        font-size: 30px;
+    }
+    
+    .work-obj {
+        width: 100%;
+    }
+    
+    .work-title a {
+        font-size: 24px;
+    }
+    
+    .social-obj {
+        width: 45px;
+    }
+    
+    .social-pop-up {
+        display: none;
+    }
+    
+    .socials-wrap a img {
+        width: 25px;
+    }
+    
+    #socials {
+        padding: 100px 0;
+    }
+    
+    .knowme-logo img {
+        width: 35px;
+    }
+}
+
+@media only screen and (max-width: 375px){
+    .knowme-head i {
+        float: none;
+        display: block;
+        padding-top: 5px;
+    }
+}
