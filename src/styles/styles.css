@@ -2,17 +2,13 @@
 
 *{
     font-family: 'Questrial', sans-serif;
-<<<<<<< HEAD
     cursor: url('../cursor.png'), auto;
-=======
->>>>>>> 3edb0d0e5b43fd4f02995fe7e84d96afdf946b70
 }
 
 .cursor {
     animation: blink 0.7s infinite;
 }
 
-<<<<<<< HEAD
 /* width */
 body::-webkit-scrollbar {
     width: 15px;
@@ -52,10 +48,8 @@ body::-webkit-scrollbar {
 body {
     margin: 0;
     overflow-x: hidden;
-=======
 body {
     margin: 0;
->>>>>>> 3edb0d0e5b43fd4f02995fe7e84d96afdf946b70
 }
 
 #banner {
