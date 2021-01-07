@@ -28,3 +28,110 @@ $('.dayswitcher').change(function(){
       $("#banner").addClass('daylight');
   }
 });
+
+if (window.matchMedia("(min-width: 768px)").matches) {
+  let mousePosX = 0,
+      mousePosY = 0,
+      mouseCircle = document.getElementById("mouse-circle");
+
+  document.onmousemove = (e) => {
+      mousePosX = e.pageX;
+      mousePosY = e.pageY;
+  };
+
+  let delay = 6,
+      revisedMousePosX = 0,
+      revisedMousePosY = 0;
+
+  function delayMouseFollow() {
+      requestAnimationFrame(delayMouseFollow);
+
+      revisedMousePosX += (mousePosX - revisedMousePosX) / delay;
+      revisedMousePosY += (mousePosY - revisedMousePosY) / delay;
+
+      mouseCircle.style.top = revisedMousePosY + "px";
+      mouseCircle.style.left = revisedMousePosX + "px";
+  }
+  delayMouseFollow();
+}
+
+$('.light-area').hover(
+  function(){
+      $("#mouse-circle").css('border', '1px solid #263d45');
+  },
+  function(){
+      $("#mouse-circle").css('border', '1px solid #ffffff');
+  }
+);
+
+(function($) {
+
+  /**
+   * Copyright 2012, Digital Fusion
+   * Licensed under the MIT license.
+   * http://teamdf.com/jquery-plugins/license/
+   *
+   * @author Sam Sehnert
+   * @desc A small plugin that checks whether elements are within
+   *     the user visible viewport of a web browser.
+   *     only accounts for vertical position, not horizontal.
+   */
+
+  $.fn.visible = function(partial) {
+    
+      var $t            = $(this),
+          $w            = $(window),
+          viewTop       = $w.scrollTop(),
+          viewBottom    = viewTop + $w.height(),
+          _top          = $t.offset().top,
+          _bottom       = _top + $t.height(),
+          compareTop    = partial === true ? _bottom : _top,
+          compareBottom = partial === true ? _top : _bottom;
+    
+    return ((compareBottom <= viewBottom) && (compareTop >= viewTop));
+
+  };
+    
+})(jQuery);
+
+var win = $(window);
+
+var logos = $(".perk-logos");
+var rateField = $(".rate-field");
+
+logos.each(function(i, el) {
+  var el = $(el);
+  if (el.visible(true)) {
+    el.addClass("already-visible"); 
+  } 
+});
+
+rateField.each(function(i, el) {
+  var el = $(el);
+  if (el.visible(true)) {
+    el.addClass("already-visible"); 
+  } 
+});
+
+win.scroll(function(event) {
+  
+  logos.each(function(i, el) {
+    var el = $(el);
+    if (el.visible(true)) {
+      el.addClass("come-in"); 
+    } 
+  });
+
+  rateField.each(function(i, el) {
+    var el = $(el);
+    if (el.visible(true)) {
+      setInterval(function(){
+        el.addClass("anim-rate");
+      },2000); 
+      setInterval(function(){
+        $('.perk-rate').addClass("anim-perk-rate");
+      },3000); 
+    } 
+  });
+
+});

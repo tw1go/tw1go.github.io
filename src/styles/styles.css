@@ -2,14 +2,52 @@
 
 *{
     font-family: 'Questrial', sans-serif;
+    cursor: url('../cursor.png'), auto;
 }
 
 .cursor {
     animation: blink 0.7s infinite;
 }
 
+/* width */
+body::-webkit-scrollbar {
+    width: 15px;
+    position: absolute;
+    opacity: 0;
+  }
+  
+  /* Track */
+  body::-webkit-scrollbar-track {
+    background: #d2d2d2;
+  
+  }
+  
+  /* Handle */
+  body::-webkit-scrollbar-thumb {
+    background: #b9b9b9;
+    border-radius: 8px
+  }
+  
+  /* Handle on hover */
+  body::-webkit-scrollbar-thumb:hover {
+    background: #00000066;
+  }
+
+#mouse-circle {
+    z-index: 100;
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    margin: -27px 0px 0px -27px;
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+    pointer-events: none !important;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0);
+}
+
 body {
     margin: 0;
+    overflow-x: hidden;
 }
 
 #banner {
@@ -238,3 +276,130 @@ body {
       text-align: center;
       padding-top: 150px;
   }
+
+  #introduction {
+        padding: 100px 300px 50px;
+        text-align: center;
+        
+    }
+  .light-area, .light-area * {
+      cursor: url(../cursor-green.png), auto; 
+  }
+
+  .intro-paragraph {
+      width: 50%;
+      margin: 25px auto;
+      line-height: 30px;
+  }
+
+  .intro-header {
+      font-size: 40px;
+  }
+
+  .intro-contact a {
+      text-decoration: none;
+      color: #78a19d;
+  }
+
+  #skills {
+      padding: 0 300px 50px;
+      text-align: center;
+      overflow: hidden;
+      height: 300px;
+  }
+  
+  .skills-wrap {
+      display: inline-block;
+      padding: 0px 34px;
+  }
+  
+  .rate-field {
+      height: 0;
+      width: 5px;
+      margin: 0 auto 10px;
+      background: #dadada;
+      position: relative;
+      opacity: 0;
+  }
+  .perk-logos {
+      width: 35px;
+  }
+  .perk-rate{
+      height: 0;
+      transition: all 1s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  }
+  .perk-rate.anim-perk-rate{
+    height: 100%;
+}
+  
+  .perk-rate.html {
+      max-height: 85%;
+      background-color: #263d45;
+      width: 5px;
+      position: absolute;
+      bottom: 0;
+  }
+
+  .perk-rate.css {
+    max-height: 80%;
+    background-color: #263d45;
+    width: 5px;
+    position: absolute;
+    bottom: 0;
+}
+
+.perk-rate.js {
+    max-height: 75%;
+    background-color: #263d45;
+    width: 5px;
+    position: absolute;
+    bottom: 0;
+}
+
+.perk-rate.php {
+    max-height: 75%;
+    background-color: #263d45;
+    width: 5px;
+    position: absolute;
+    bottom: 0;
+}
+.perk-rate.ps {
+    max-height: 85%;
+    background-color: #263d45;
+    width: 5px;
+    position: absolute;
+    bottom: 0;
+} 
+.perk-rate.wp {
+    max-height: 75%;
+    background-color: #263d45;
+    width: 5px;
+    position: absolute;
+    bottom: 0;
+}
+
+.perk-name {
+    font-style: normal;
+    padding: 10px 0;
+    display: block;
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.skills-wrap:hover .perk-name {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.come-in {
+    animation: come-in 2s;
+}
+.anim-rate{
+    animation: anim-rate 1s;
+}
+
+.rate-field.anim-rate {
+    opacity: 1;
+    height: 200px;
+}
