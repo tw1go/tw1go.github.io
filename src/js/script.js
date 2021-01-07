@@ -64,6 +64,24 @@ $('.light-area').hover(
   }
 );
 
+$('a').hover(
+  function(){
+      $('#mouse-circle').css({'border':'1px solid #f6937e','width': '40px','height': '40px','margin': '-17px 0px 0px -17px'});
+  },
+  function(){
+      $("#mouse-circle").css({'border':'1px solid #ffffff','width': '54px','height': '54px','margin': '-27px 0px 0px -27px'});
+}
+);
+
+$('.light-area a').hover(
+  function(){
+      $('#mouse-circle').css({'border':'1px solid #f6937e','width': '40px','height': '40px','margin': '-17px 0px 0px -17px'});
+  },
+  function(){
+      $("#mouse-circle").css({'border':'1px solid #263d45','width': '54px','height': '54px','margin': '-27px 0px 0px -27px'});
+}
+);
+
 (function($) {
 
   /**
@@ -98,6 +116,8 @@ var win = $(window);
 
 var logos = $(".perk-logos");
 var rateField = $(".rate-field");
+var knowmetitle = $(".knowme-title");
+var knowmeobj = $(".knowme-obj-wrap");
 
 logos.each(function(i, el) {
   var el = $(el);
@@ -107,6 +127,20 @@ logos.each(function(i, el) {
 });
 
 rateField.each(function(i, el) {
+  var el = $(el);
+  if (el.visible(true)) {
+    el.addClass("already-visible"); 
+  } 
+});
+
+knowmetitle.each(function(i, el) {
+  var el = $(el);
+  if (el.visible(true)) {
+    el.addClass("already-visible"); 
+  } 
+});
+
+knowmeobj.each(function(i, el) {
   var el = $(el);
   if (el.visible(true)) {
     el.addClass("already-visible"); 
@@ -134,4 +168,26 @@ win.scroll(function(event) {
     } 
   });
 
+  knowmetitle.each(function(i, el) {
+    var el = $(el);
+    if (el.visible(true)) {
+      el.addClass("slide-left"); 
+      setInterval(function(){
+        $(".knowme-title i").addClass("slide-left");
+      },2000); 
+    } 
+  });
+
+  knowmeobj.each(function(i, el) {
+    var el = $(el);
+    if (el.visible(true)) {
+      el.addClass("come-in"); 
+    } 
+  });
+
+});
+
+$('.year-today').text(function(){
+  var d = new Date();
+  return d.getFullYear();
 });
