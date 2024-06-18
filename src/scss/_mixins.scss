@@ -1,0 +1,15 @@
+@mixin sp () {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin max-width( $width: 1600px ) {
+  max-width: $width;
+  margin: 0 auto;
+
+  @include sp {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+}

@@ -1,0 +1,211 @@
+@keyframes wave-animation {
+  0% {
+    transform: rotate(0.0deg)
+  }
+
+  10% {
+    transform: rotate(14.0deg)
+  }
+
+  /* The following five values can be played with to make the waving more or less extreme */
+  20% {
+    transform: rotate(-8.0deg)
+  }
+
+  30% {
+    transform: rotate(14.0deg)
+  }
+
+  40% {
+    transform: rotate(-4.0deg)
+  }
+
+  50% {
+    transform: rotate(10.0deg)
+  }
+
+  60% {
+    transform: rotate(0.0deg)
+  }
+
+  /* Reset for the last half to pause */
+  100% {
+    transform: rotate(0.0deg)
+  }
+}
+
+@keyframes vertical-waves {
+
+  10% {
+    transform: translateY(5%);
+  }
+
+  20% {
+    transform: translateY(-10%)
+  }
+
+  30% {
+    transform: translateY(15%)
+  }
+
+  40% {
+    transform: translateY(-5%)
+  }
+
+  50% {
+    transform: translateY(10%)
+  }
+
+  60% {
+    transform: translateY(0%)
+  }
+
+  70% {
+    transform: translateY(8%)
+  }
+
+  80% {
+    transform: translateY(-5%)
+  }
+
+  90% {
+    transform: translateY(2%)
+  }
+
+  100% {
+    transform: translateY(0%)
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(calc(-1920px * 3));
+  }
+}
+
+@keyframes sway {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  10% {
+    transform: rotate(5deg);
+  }
+
+  25% {
+    transform: rotate(-5deg);
+  }
+
+  35% {
+    transform: rotate(3deg);
+  }
+
+  50% {
+    transform: rotate(5deg);
+  }
+
+  65% {
+    transform: rotate(-3deg);
+  }
+
+  75% {
+    transform: rotate(-9deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes sway2 {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  10% {
+    transform: rotate(-3deg);
+  }
+
+  25% {
+    transform: rotate(-7deg);
+  }
+
+  35% {
+    transform: rotate(9deg);
+  }
+
+  50% {
+    transform: rotate(-2deg);
+  }
+
+  65% {
+    transform: rotate(6deg);
+  }
+
+  75% {
+    transform: rotate(-7deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes boat-animation {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(10px) rotate(2deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+
+  75% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+}
+
+@keyframes drift {
+  0% {
+    right: -20%
+  }
+
+  100% {
+    right: 100%
+  }
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popUp {
+  0% {
+    transform: translateY(200%);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
