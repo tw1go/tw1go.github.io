@@ -1,0 +1,94 @@
+/* ============================================================
+   twigo — design tokens
+   Brand palette is the source of truth; everything else derives
+   from it so a palette tweak propagates across the whole site.
+   ============================================================ */
+
+:root {
+  /* ── Brand palette ──────────────────────────────────────── */
+  --twigo-violet: #7c2ae8;
+  --twigo-magenta: #d946ef;
+  --twigo-lime: #a3e635;
+  --twigo-green: #22c55e;
+  --twigo-ink: #111827;
+
+  /* Raw channels, for rgb(... / alpha) compositing */
+  --twigo-violet-rgb: 124 42 232;
+  --twigo-magenta-rgb: 217 70 239;
+  --twigo-lime-rgb: 163 230 53;
+  --twigo-green-rgb: 34 197 94;
+  --twigo-ink-rgb: 17 24 39;
+
+  /* ── Surfaces ───────────────────────────────────────────── */
+  /* The room is unlit — true black, not ink. Ink is the UI surface. */
+  --color-room: #000;
+  --color-bg: var(--twigo-ink);
+  --color-bg-deep: color-mix(in srgb, var(--twigo-ink) 80%, black);
+  --color-surface: color-mix(in srgb, var(--twigo-ink) 88%, white);
+  --color-surface-raised: color-mix(in srgb, var(--twigo-ink) 78%, white);
+  --color-border: color-mix(in srgb, var(--twigo-ink) 62%, white);
+  --color-border-glow: rgb(var(--twigo-violet-rgb) / 0.55);
+
+  /* ── Room ───────────────────────────────────────────────────
+     Wood tones for the floor. Kept darker than the desk in the
+     sprite so the character still reads as the lit subject. */
+  --wood-base: #28170d;
+  --wood-plank: #2e1d11;
+  --wood-seam: #150b05;
+
+  /* ── Text ───────────────────────────────────────────────── */
+  --color-text: #e8e6f0;
+  --color-text-dim: color-mix(in srgb, #e8e6f0 58%, var(--twigo-ink));
+  --color-text-invert: var(--twigo-ink);
+
+  /* ── Semantic accents ───────────────────────────────────── */
+  --color-primary: var(--twigo-violet);
+  --color-secondary: var(--twigo-magenta);
+  --color-highlight: var(--twigo-lime);
+  --color-success: var(--twigo-green);
+
+  /* ── Gradients ──────────────────────────────────────────── */
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--twigo-violet),
+    var(--twigo-magenta)
+  );
+  --gradient-energy: linear-gradient(
+    135deg,
+    var(--twigo-lime),
+    var(--twigo-green)
+  );
+
+  /* ── Pixel grid ─────────────────────────────────────────────
+     Everything snaps to multiples of --px so edges stay crisp. */
+  --px: 4px;
+  --px-2: calc(var(--px) * 2);
+  --px-3: calc(var(--px) * 3);
+  --px-4: calc(var(--px) * 4);
+  --px-6: calc(var(--px) * 6);
+  --px-8: calc(var(--px) * 8);
+  --px-12: calc(var(--px) * 12);
+  --px-16: calc(var(--px) * 16);
+
+  --border-width: var(--px);
+  --radius: 0; /* pixel art has no rounded corners */
+
+  /* Hard offset shadows — no blur, ever. */
+  --shadow-hard: var(--px) var(--px) 0 0 var(--color-bg-deep);
+  --shadow-hard-lg: var(--px-2) var(--px-2) 0 0 var(--color-bg-deep);
+  --shadow-primary: var(--px) var(--px) 0 0 var(--color-primary);
+
+  /* ── Type ───────────────────────────────────────────────── */
+  /* Both roles share Minecraft; the tokens stay split so headings can
+     diverge later without touching every rule. */
+  --font-display: 'Minecraft', ui-monospace, 'Courier New', monospace;
+  --font-body: 'Minecraft', ui-monospace, 'Courier New', monospace;
+  --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+
+  /* ── Motion ─────────────────────────────────────────────── */
+  --ease-step: steps(4, end); /* chunky, non-smooth transitions */
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+
+  color-scheme: dark;
+}

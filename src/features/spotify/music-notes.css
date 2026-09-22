@@ -1,0 +1,58 @@
+/* Fills the layer it is dropped into, which mirrors the sprite frame, so
+   the percentages below are fractions of the character rather than of the
+   viewport. */
+.music-notes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The sprite is solid black on transparent — invisible in a dark room —
+   so it masks a coloured box instead of being drawn as an image. Colour
+   then comes from the palette, matching the strip's "live" green. */
+.music-notes__note {
+  position: absolute;
+  left: var(--n-x);
+  /* Level with the character's head: the art occupies rows 87-174 of the
+     256px frame, so 36% sits at the headphones rather than above them,
+     which keeps the notes starting on the character, not beside them. */
+  top: 36%;
+  height: calc(var(--scene-pixel) * 10);
+  aspect-ratio: var(--note-aspect);
+  background: var(--color-highlight);
+  mask-image: var(--note-src);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  opacity: 0;
+  animation-name: note-rise;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes note-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(var(--n-scale));
+  }
+  /* Up to full quickly, then a long slow fade for the rest of the climb —
+     that asymmetry is what reads as drifting away rather than blinking. */
+  18% {
+    opacity: 0.8;
+  }
+  /* Gone before the wordmark, which sits at 18% of the frame. Rising the
+     full height would run the notes straight through the sign. */
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(var(--frame) * var(--n-drift)),
+        calc(var(--frame) * -0.15)
+      )
+      scale(var(--n-scale));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-notes {
+    display: none;
+  }
+}

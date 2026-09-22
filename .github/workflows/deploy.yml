@@ -1,0 +1,52 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Vite 8's bundler needs >= 22.12; .nvmrc pins the major only.
+          node-version: 22.23.2
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          # Public by design: it is baked into the bundle. Set it under
+          # Settings -> Secrets and variables -> Actions -> Variables,
+          # e.g. https://twigo-api.vercel.app/api/now-playing
+          VITE_NOW_PLAYING_URL: ${{ vars.VITE_NOW_PLAYING_URL }}
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,99 @@
+/* ============================================================
+   Sprite sheet animation
+   ------------------------------------------------------------
+   Based on the single-element background-position + steps()
+   technique: https://leanrada.com/notes/css-sprite-sheets/
+
+   The article animates a single horizontal strip. Our sheets are
+   2D grids with a partially-filled last row (e.g. 14 frames in a
+   4x4 sheet), so instead of animating `background-position`
+   directly we animate one registered <integer> custom property —
+   `--sprite-frame` — and derive the x/y offset from it:
+
+     x = (frame mod columns)   * frameWidth
+     y = floor(frame / columns) * frameHeight
+
+   `steps(n)` still does the real work: it makes the integer land
+   exactly on 0, 1, ... n-1 and never between frames. Because the
+   frame index is driven by a count rather than a pixel offset,
+   blank trailing cells are simply never visited.
+   ============================================================ */
+
+@property --sprite-frame {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.sprite {
+  /* Overridden per sprite via inline custom properties. */
+  --sprite-src: none;
+  --sprite-frame-w: 256;
+  --sprite-frame-h: 256;
+  --sprite-cols: 1;
+  --sprite-frames: 1;
+  --sprite-duration: 1s;
+  --sprite-iterations: infinite;
+  --sprite-direction: normal;
+  --sprite-scale: 1;
+
+  /* Derived — rows only matters for sizing the scaled sheet. */
+  --sprite-rows: round(up, var(--sprite-frames) / var(--sprite-cols), 1);
+  --sprite-w: calc(var(--sprite-frame-w) * var(--sprite-scale) * 1px);
+  --sprite-h: calc(var(--sprite-frame-h) * var(--sprite-scale) * 1px);
+
+  display: block;
+  flex: none;
+  width: var(--sprite-w);
+  height: var(--sprite-h);
+
+  background-image: var(--sprite-src);
+  background-repeat: no-repeat;
+  background-size:
+    calc(var(--sprite-w) * var(--sprite-cols))
+    calc(var(--sprite-h) * var(--sprite-rows));
+
+  /* Fallback for engines without mod()/round(): show frame 0. */
+  background-position: 0 0;
+  background-position:
+    calc(-1 * mod(var(--sprite-frame), var(--sprite-cols)) * var(--sprite-w))
+    calc(
+      -1 * round(down, var(--sprite-frame) / var(--sprite-cols), 1) *
+        var(--sprite-h)
+    );
+
+  /* Keep the art blocky at any scale. */
+  image-rendering: pixelated;
+
+  /* `alternate` reverses the step timing along with the keyframes, so a
+     ping-pong pass walks the frames back down n-1 ... 0 and settles on
+     frame 0 — the same pose an idle loop starts from. */
+  animation: sprite-play var(--sprite-duration)
+    steps(var(--sprite-frames), jump-end) var(--sprite-iterations)
+    var(--sprite-direction) both;
+}
+
+@keyframes sprite-play {
+  from {
+    --sprite-frame: 0;
+  }
+  to {
+    /* steps(n, jump-end) stops one short, so the last value is n-1. */
+    --sprite-frame: var(--sprite-frames);
+  }
+}
+
+/* Single-frame sheets have nothing to animate. */
+.sprite[data-static='true'] {
+  animation: none;
+}
+
+.sprite[data-paused='true'] {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite {
+    animation: none;
+  }
+}

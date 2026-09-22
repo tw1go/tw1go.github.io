@@ -1,0 +1,65 @@
+@import './styles/fonts.css';
+@import './styles/variables.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--color-text);
+
+  /* A dark room: true black, with a faint CRT scanline wash and a
+     vignette so the edges fall away from the centre. */
+  background-color: var(--color-room);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.018) 0 1px,
+      transparent 1px 3px
+    ),
+    radial-gradient(
+      120% 90% at 50% 45%,
+      transparent 40%,
+      rgb(0 0 0 / 0.85) 100%
+    );
+  background-attachment: fixed;
+
+  /* Pixel fonts must never be smoothed away. */
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  image-rendering: pixelated;
+}
+
+a {
+  color: var(--color-highlight);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-secondary);
+}
+
+:focus-visible {
+  outline: var(--border-width) solid var(--color-highlight);
+  outline-offset: var(--px);
+}
+
+::selection {
+  background: var(--color-secondary);
+  color: var(--color-text-invert);
+}

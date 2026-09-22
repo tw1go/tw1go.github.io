@@ -1,0 +1,175 @@
+/* ============================================================
+   Speech bubble above the character's head.
+
+   Lives in .scene__dialog, which mirrors the sprite frame's box, so
+   `bottom` is a fraction of that frame and the bubble keeps the same gap
+   above the head at every scale. The art's top row is 87 of 256 (34%
+   down the frame), so its base sits just above that.
+   ============================================================ */
+
+.dialog-bubble {
+  --dlg-px: 4px;
+  --dlg-bg: color-mix(in srgb, var(--twigo-ink) 84%, #000);
+  --dlg-border: color-mix(in srgb, #fff 74%, var(--twigo-ink));
+  /* Distance from the bubble's left edge to the tail — and therefore to
+     the head. The box hangs to the right of it rather than sitting
+     squarely on top of the character. A length, not a percentage: as a
+     percentage the tail drifted with the length of the line, and on a
+     short one it landed inside the corner radius.
+
+     Tucked into the lower-left corner: the tail is 8px wide and centred
+     on this, and the bottom edge only runs straight once the corner
+     radius (7px) has finished, so 7 + half the tail puts its left edge
+     exactly where the curve ends — as far into the corner as it goes
+     without undercutting the rounding. */
+  --dlg-anchor: calc(var(--dlg-px) * 11);
+  --dlg-shift: calc(var(--dlg-anchor) * -1);
+
+  position: absolute;
+  left: 50%;
+  bottom: 68.5%;
+  transform: translateX(var(--dlg-shift));
+  transform-origin: var(--dlg-anchor) 100%; /* pops out of the tail */
+
+  width: max-content;
+  max-width: min(34ch, 80vw);
+  padding: calc(var(--dlg-px) * 5) calc(var(--dlg-px) * 8);
+  border-radius: calc(var(--dlg-px) * 7);
+
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  line-height: 1.4;
+  text-align: center;
+  color: #fff;
+
+  background: var(--dlg-bg);
+  border: var(--dlg-px) solid var(--dlg-border);
+  /* Hard offset, no blur — same rule as the rest of the room. */
+  box-shadow: var(--dlg-px) var(--dlg-px) 0 0 rgb(0 0 0 / 0.55);
+
+  /* Only the entrance is timed in CSS. The exit is the line un-typing,
+     driven from JS, and the box pops out after that via [data-closing]. */
+  animation: bubble-in 200ms steps(1, jump-end) both;
+}
+
+.dialog-bubble[data-closing] {
+  animation: bubble-out 180ms steps(1, jump-end) forwards;
+}
+
+/* Stepped tail, drawn twice: the larger copy is the outline, the smaller
+   one the fill. A CSS border-triangle would come out smooth-edged, which
+   would be the one soft diagonal in an otherwise hard-edged scene. */
+.dialog-bubble::before,
+.dialog-bubble::after {
+  content: '';
+  position: absolute;
+  left: var(--dlg-anchor);
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% 33.33%,
+    83.33% 33.33%,
+    83.33% 66.66%,
+    66.66% 66.66%,
+    66.66% 100%,
+    33.33% 100%,
+    33.33% 66.66%,
+    16.66% 66.66%,
+    16.66% 33.33%,
+    0% 33.33%
+  );
+}
+
+.dialog-bubble::before {
+  top: 100%;
+  width: calc(var(--dlg-px) * 8);
+  height: calc(var(--dlg-px) * 4);
+  margin-left: calc(var(--dlg-px) * -4);
+  background: var(--dlg-border);
+}
+
+/* One pixel up and one in on each side, so the outline reads all the way
+   round and the fill joins the bubble's interior. */
+.dialog-bubble::after {
+  top: calc(100% - var(--dlg-px));
+  width: calc(var(--dlg-px) * 6);
+  height: calc(var(--dlg-px) * 3);
+  margin-left: calc(var(--dlg-px) * -3);
+  background: var(--dlg-bg);
+}
+
+.dialog-bubble__text {
+  position: relative;
+  display: block;
+}
+
+.dialog-bubble__ghost {
+  visibility: hidden;
+}
+
+/* The ghost's copy is a spacer only — it is never seen, so it should not
+   be running a blink for the life of the bubble. */
+.dialog-bubble__ghost .dialog-bubble__caret {
+  animation: none;
+}
+
+.dialog-bubble__typed {
+  position: absolute;
+  inset: 0;
+}
+
+.dialog-bubble__caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.9em;
+  margin-left: 0.12em;
+  vertical-align: -0.08em;
+  background: var(--twigo-lime);
+  animation: caret-blink 560ms steps(1, jump-end) infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateX(var(--dlg-shift)) translateY(calc(var(--dlg-px) * 2))
+      scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(var(--dlg-shift)) scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(var(--dlg-shift)) scale(1);
+  }
+}
+
+@keyframes bubble-out {
+  0% {
+    opacity: 1;
+    transform: translateX(var(--dlg-shift)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--dlg-shift)) translateY(calc(var(--dlg-px) * 2))
+      scale(0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-bubble,
+  .dialog-bubble__caret {
+    animation: none;
+  }
+}

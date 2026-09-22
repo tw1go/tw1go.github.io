@@ -1,0 +1,400 @@
+/* ============================================================
+   The scene — one screen, one character, a dark room.
+
+   Everything is anchored to two numbers on `.scene`:
+     --scene-scale  the pixel grid, shared by the sprite and the room
+     --horizon      where the floor line sits in the viewport
+
+   The sprite frame is then positioned so the character's feet land a
+   fixed distance in front of the horizon, which keeps the floor the
+   same depth at every scale instead of sliding off the bottom.
+   ============================================================ */
+
+/* The room's light colour. Registered so it can be interpolated — an
+   unregistered custom property is just a token stream and would jump
+   between keyframes instead of blending. Inherited so the wall glow and
+   the floor pool read the same value and stay in sync. */
+@property --glow-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #7c2ae8;
+}
+
+@property --glow-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d946ef;
+}
+
+@keyframes glow-cycle {
+  0%,
+  100% {
+    --glow-primary: var(--twigo-violet);
+    --glow-secondary: var(--twigo-magenta);
+  }
+  50% {
+    --glow-primary: var(--twigo-green);
+    --glow-secondary: var(--twigo-lime);
+  }
+}
+
+.scene {
+  --scene-scale: 5;
+  --scene-pixel: calc(var(--scene-scale) * 1px);
+  --frame: calc(256 * var(--scene-pixel));
+
+  /* Sits low on purpose. Pushed further up the screen the black above it
+     starts reading as a distant back wall rather than an unlit room. */
+  --horizon: 80dvh;
+
+  /* Measured off the sheets: the lowest opaque row of the art (the chair
+     wheels) is row 174 of 256, so the art bottom is 68.36% down the frame.
+     --character-depth then pushes the character in front of the horizon
+     so the boards run up behind them, the way the desk legs recede. */
+  --character-depth: calc(var(--scene-pixel) * 8);
+  --stage-top: calc(
+    var(--horizon) + var(--character-depth) - var(--frame) * 0.6836
+  );
+
+  position: relative;
+  /* Fixed rather than min-height: the sprite frame is mostly empty space
+     and is allowed to overrun the viewport, so the room must clip it
+     instead of growing and introducing a page scroll. */
+  height: 100dvh;
+  overflow: hidden;
+
+  animation: glow-cycle 24s ease-in-out infinite;
+}
+
+/* Monitor spill on the back wall. Shares the sprite frame's box so the
+   glow stays sized to the character rather than to the viewport. */
+.scene__glow {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      88% 52% at 50% 43%,
+      color-mix(in srgb, var(--glow-primary) 20%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      50% 32% at 50% 40%,
+      color-mix(in srgb, var(--glow-secondary) 12%, transparent),
+      transparent 70%
+    );
+  animation: room-breathe 7s ease-in-out infinite;
+}
+
+@keyframes room-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.scene__stage {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 1; /* stands on the floor, not behind it */
+}
+
+/* Scale is driven here rather than by the component so the 256px frame
+   can step down per breakpoint. Must out-specify `.sprite`'s own
+   `--sprite-scale: 1`, which would otherwise beat an inherited value. */
+.scene__stage .sprite {
+  --sprite-scale: var(--scene-scale);
+}
+
+/* Music notes ride above the character but below the dialog, so a speech
+   bubble is never obscured by one drifting past. Same box as the stage. */
+.scene__notes {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Dialog sits above everything else in the room. It mirrors the stage's
+   box so a bubble can still be placed as a fraction of the sprite frame,
+   but as a sibling it is free of the stage's stacking context. */
+.scene__dialog {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ── Floor ────────────────────────────────────────────────────
+   Boards run away from the viewer, so the seams converge on a
+   vanishing point at the centre of the horizon — a repeating conic
+   gradient anchored at `50% 0%` is exactly that fan. The cross-joints
+   are a linear gradient with hand-placed stops that bunch up toward
+   the horizon, which is what sells near-to-far.
+
+   Note this plane cannot sit on the sprite's pixel grid — a receding
+   surface has no constant pixel size — so the fan is kept shallow and
+   low-contrast rather than competing with the character's hard edges.
+   ============================================================ */
+.scene__floor {
+  --seam-period: 6deg;
+  --seam-width: 0.45deg;
+  /* 183deg puts the centre of a plank on the vertical, so the character
+     isn't standing astride a seam. */
+  --seam-origin: 183deg;
+  /* Vanishing point, lifted above the floor's top edge. On the edge
+     itself every seam pinched into one visible point behind the chair,
+     which read as a corridor running off to infinity. Held back up here
+     the seams still splay toward the viewer but never meet on screen. */
+  --seam-focus: -70%;
+
+  position: absolute;
+  inset: var(--horizon) 0 0 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background-color: var(--wood-base);
+  background-image:
+    /* Falloff away from the desk. Without it the untinted outer boards
+       read as brighter than the lit centre. */
+    radial-gradient(
+      75% 130% at 50% 0%,
+      transparent 0 34%,
+      rgb(0 0 0 / 0.38) 66%,
+      rgb(0 0 0 / 0.75) 100%
+    ),
+    /* Monitor spill pooling on the boards. Single stop positions rather
+       than ranges, so the colours interpolate into each other instead of
+       stepping through flat bands. */
+    radial-gradient(
+      62% 88% at 50% 0%,
+      color-mix(in srgb, var(--glow-primary) 30%, transparent) 0%,
+      color-mix(in srgb, var(--glow-primary) 18%, transparent) 28%,
+      color-mix(in srgb, var(--glow-secondary) 8%, transparent) 54%,
+      transparent 78%
+    ),
+    /* Board ends. Each gap is roughly 1.3x the one above it and the lines
+       thicken to match — equal spacing would flatten the plane back out. */
+    linear-gradient(
+      to bottom,
+      transparent 0 8%,
+      rgb(0 0 0 / 0.36) 8% calc(8% + 1px),
+      transparent calc(8% + 1px) 20%,
+      rgb(0 0 0 / 0.36) 20% calc(20% + 2px),
+      transparent calc(20% + 2px) 36%,
+      rgb(0 0 0 / 0.36) 36% calc(36% + 2px),
+      transparent calc(36% + 2px) 57%,
+      rgb(0 0 0 / 0.36) 57% calc(57% + 3px),
+      transparent calc(57% + 3px) 84%,
+      rgb(0 0 0 / 0.36) 84% calc(84% + 4px),
+      transparent calc(84% + 4px)
+    ),
+    /* Alternating plank tone, every other board. */
+    repeating-conic-gradient(
+      from var(--seam-origin) at 50% var(--seam-focus),
+      var(--wood-plank) 0 var(--seam-period),
+      transparent var(--seam-period) calc(var(--seam-period) * 2)
+    ),
+    /* The seams themselves, converging on the vanishing point. */
+    repeating-conic-gradient(
+      from var(--seam-origin) at 50% var(--seam-focus),
+      var(--wood-seam) 0 var(--seam-width),
+      transparent var(--seam-width) var(--seam-period)
+    );
+
+  /* Fades the boards back into the black room, so the floor needs no
+     walls to end on. */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 20%,
+    #000 80%,
+    transparent 100%
+  );
+}
+
+/* ── Sign ─────────────────────────────────────────────────────
+   A lit sign on the wall above the desk. Anchored to the stage box
+   rather than the viewport so it keeps the same gap above the
+   character's head at every scale. */
+.scene__wordmark {
+  /* One font-pixel of the Minecraft face at this size, near enough.
+     Drives the emboss offset so the shading lands on the glyph grid. */
+  --sign-px: 5px;
+  --sign-core: var(--twigo-lime);
+  --sign-highlight: color-mix(in srgb, var(--twigo-lime) 45%, #fff);
+  --sign-emboss: color-mix(in srgb, var(--twigo-green) 38%, #000);
+  /* Alphas stay high even on the widest layers. A blur spreads a colour
+     over its whole radius, so alpha and blur fight each other — a faint
+     colour at a large radius dilutes to nothing. The blur does the
+     falloff here; the colour barely fades. Layers also stack, so the
+     tight ones pile up into a hot core. */
+  --sign-glow: var(--twigo-green);
+  --sign-halo: color-mix(in srgb, var(--twigo-green) 92%, transparent);
+  --sign-far: color-mix(in srgb, var(--twigo-green) 82%, transparent);
+  --sign-spill: color-mix(in srgb, var(--twigo-green) 68%, transparent);
+  --sign-spill-far: color-mix(in srgb, var(--twigo-green) 52%, transparent);
+  /* An unlit tube still catches a little of the room. */
+  --sign-off: color-mix(in srgb, var(--twigo-green) 26%, #000);
+
+  /* Both states carry the same layer count so they swap cleanly.
+     The spill is built entirely from blurred copies of the glyphs —
+     a radial gradient behind the text reads as a circle sitting on the
+     wall, no matter how soft, because it knows nothing about the
+     letterforms. Each blur step roughly doubles, so the falloff is
+     smooth while every layer still holds the shape of the word. */
+  --sign-shadow-on:
+    /* Emboss: zero blur, so both edges stay hard and on-grid. */
+    0 calc(var(--sign-px) * -1) 0 var(--sign-highlight),
+    0 var(--sign-px) 0 var(--sign-emboss),
+    /* Bloom, so it reads as something actually lit in a dark room. */
+    0 0 var(--sign-px) var(--sign-glow),
+    0 0 calc(var(--sign-px) * 2) var(--sign-glow),
+    0 0 calc(var(--sign-px) * 4) var(--sign-halo),
+    0 0 calc(var(--sign-px) * 8) var(--sign-far),
+    0 0 calc(var(--sign-px) * 15) var(--sign-spill),
+    0 0 calc(var(--sign-px) * 26) var(--sign-spill-far),
+    0 0 calc(var(--sign-px) * 42) var(--sign-spill-far);
+  --sign-shadow-off: 0 calc(var(--sign-px) * -1) 0 transparent,
+    0 var(--sign-px) 0 var(--sign-emboss), 0 0 var(--sign-px) transparent,
+    0 0 calc(var(--sign-px) * 2) transparent, 0 0 calc(var(--sign-px) * 4)
+    transparent, 0 0 calc(var(--sign-px) * 8) transparent, 0 0
+    calc(var(--sign-px) * 15) transparent, 0 0 calc(var(--sign-px) * 26)
+    transparent, 0 0 calc(var(--sign-px) * 42) transparent;
+
+  position: absolute;
+  top: calc(var(--stage-top) + var(--frame) * 0.18);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+
+  font-family: var(--font-display);
+  font-size: 4rem;
+  letter-spacing: 0.24em;
+  /* letter-spacing also trails the last glyph, which drags the centred
+     box left; an equal lead-in puts the word back on centre. */
+  padding-left: 0.24em;
+
+  color: var(--sign-core);
+  text-shadow: var(--sign-shadow-on);
+}
+
+/* The one dud tube in the sign. Long cycle with two short irregular
+   bursts, so it mostly sits steady and the stutter feels incidental
+   rather than metronomic. steps(1) keeps each state a hard cut — a
+   fade would read as a dimmer, not a failing light.
+
+   Swaps colour and glow rather than opacity: a transparent glyph just
+   fades toward the wall, whereas dropping to --sign-off with the bloom
+   killed looks like the tube itself going out. */
+.scene__wordmark-flicker {
+  animation: sign-flicker 11s steps(1, jump-end) infinite;
+}
+
+@keyframes sign-flicker {
+  0%,
+  40% {
+    color: var(--sign-core);
+    text-shadow: var(--sign-shadow-on);
+  }
+  40.6% {
+    color: var(--sign-off);
+    text-shadow: var(--sign-shadow-off);
+  }
+  41.3% {
+    color: var(--sign-core);
+    text-shadow: var(--sign-shadow-on);
+  }
+  42.5% {
+    color: var(--sign-off);
+    text-shadow: var(--sign-shadow-off);
+  }
+  42.9% {
+    color: var(--sign-core);
+    text-shadow: var(--sign-shadow-on);
+  }
+  44% {
+    color: var(--sign-off);
+    text-shadow: var(--sign-shadow-off);
+  }
+  44.7%,
+  71% {
+    color: var(--sign-core);
+    text-shadow: var(--sign-shadow-on);
+  }
+  71.5% {
+    color: var(--sign-off);
+    text-shadow: var(--sign-shadow-off);
+  }
+  72.2% {
+    color: var(--sign-core);
+    text-shadow: var(--sign-shadow-on);
+  }
+  72.7% {
+    color: var(--sign-off);
+    text-shadow: var(--sign-shadow-off);
+  }
+  73.5%,
+  100% {
+    color: var(--sign-core);
+    text-shadow: var(--sign-shadow-on);
+  }
+}
+
+/* ── Responsive ───────────────────────────────────────────────
+   Whole-number steps only, so the pixel grid never lands on a half
+   pixel. Only 188 of the frame's 256 columns hold art, so each step
+   can hang on a little past its nominal width and let the empty
+   edges clip. */
+
+@media (max-width: 1100px) {
+  .scene {
+    --scene-scale: 4;
+  }
+}
+
+@media (max-width: 900px) {
+  .scene {
+    --scene-scale: 3;
+  }
+}
+
+@media (max-width: 700px) {
+  .scene {
+    --scene-scale: 2;
+  }
+}
+
+@media (max-width: 420px) {
+  .scene {
+    --scene-scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene,
+  .scene__glow,
+  .scene__wordmark-flicker {
+    animation: none;
+  }
+}

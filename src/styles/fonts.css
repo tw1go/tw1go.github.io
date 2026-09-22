@@ -1,0 +1,14 @@
+/* Self-hosted, so there's no third-party request and no flash of a
+   non-pixel fallback. Vite hashes the URL at build time.
+
+   `font-display: block` rather than `swap`: the fallback is a smooth
+   system monospace that looks nothing like the art, so a brief invisible
+   period reads better than swapping fonts mid-view. The file is 14kB and
+   served from the same origin, so that period is very short. */
+@font-face {
+  font-family: 'Minecraft';
+  src: url('../assets/font/Minecraft.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
