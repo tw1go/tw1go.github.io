@@ -149,8 +149,12 @@
    a shut curtain covers it completely and an open one leaves only the
    part that clears the tied-back drape.
 
-   Unclickable until the curtain is drawn back, so it cannot be triggered
-   while nobody could possibly have seen it. */
+   Hidden only while the curtain is actually shut — which includes it
+   being caught in a draught, since a billowing shut curtain lifts far
+   enough to show what is behind it. The moment the drapes start moving
+   it is on, so it is revealed by the opening rather than appearing
+   afterwards, and it stays on through the close so the fabric covers it
+   instead of it blinking out. */
 .wall-window__secret {
   position: absolute;
   /* Far enough left that the tied-back drape covers most of it — only
@@ -164,11 +168,17 @@
   padding: 0;
   border: 0;
   background: none;
-  pointer-events: none;
   -webkit-tap-highlight-color: transparent;
+
+  opacity: 0;
+  pointer-events: none;
+  /* Fades in once the drapes have settled, rather than popping. */
+  transition: opacity 320ms ease-out;
 }
 
-.wall-window[data-open] .wall-window__secret {
+.wall-window:not([data-phase='shut']):not([data-phase='gust'])
+  .wall-window__secret {
+  opacity: 1;
   pointer-events: auto;
   cursor: pointer;
 }

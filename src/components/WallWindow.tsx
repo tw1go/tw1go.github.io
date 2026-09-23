@@ -93,7 +93,16 @@ export function WallWindow({ side, toggles, onToggle, children }: WallWindowProp
   return (
     /* A container rather than a button: whatever is hidden in the window
        is itself clickable, and a button cannot contain another one. */
-    <div className={`wall-window wall-window--${side}`} data-open={open || undefined}>
+    /* `data-phase` is the curtain's actual state, not just whether it has
+       been asked to open. Anything hidden in the window keys off that:
+       the drapes take well over a second to draw back, and a billowing
+       shut curtain briefly uncovers the corners, so `data-open` alone
+       would let the secret flash into view. */
+    <div
+      className={`wall-window wall-window--${side}`}
+      data-open={open || undefined}
+      data-phase={phase}
+    >
       <button
         type="button"
         className="wall-window__toggle"
