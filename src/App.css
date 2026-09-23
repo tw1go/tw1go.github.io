@@ -82,6 +82,28 @@
   pointer-events: none;
 }
 
+/* Air conditioner, high on the back wall.
+
+   `top` rather than `bottom`: it hangs from above, and the frame's own
+   top is off screen — row 0 sits above the viewport — so anchoring from
+   the bottom would put it somewhere unpredictable.
+
+   Centred and above the sign, in the band the sign was moved down to
+   clear. Its art runs rows 38-58 of the frame against the sign's top at
+   row 64, so the two never crowd each other. */
+.scene__wall .scene__aircon {
+  --sprite-scale: calc(var(--scene-scale) * 0.4);
+
+  position: absolute;
+  left: 50%;
+  top: 13.5%;
+  transform: translateX(-50%);
+
+  /* Bright white plastic in an unlit room reads as a light source unless
+     it is knocked back, the same problem the jukebox had. */
+  filter: brightness(0.75);
+}
+
 /* Monitor spill on the back wall. Shares the sprite frame's box so the
    glow stays sized to the character rather than to the viewport. */
 .scene__glow {
@@ -435,7 +457,10 @@
     transparent, 0 0 calc(var(--sign-px) * 42) transparent;
 
   position: absolute;
-  top: calc(var(--stage-top) + var(--frame) * 0.18);
+  /* Lowered from 0.18 to make room for the air conditioner above it.
+     The frame's first rows sit above the viewport, so the only way to
+     get a unit of any size up there is to move the sign down. */
+  top: calc(var(--stage-top) + var(--frame) * 0.25);
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;

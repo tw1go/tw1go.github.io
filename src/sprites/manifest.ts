@@ -2,6 +2,8 @@ import curtainBlownSheet from '../assets/sprites/curtain/animation-window-blown.
 import curtainOpenSheet from '../assets/sprites/curtain/animation-curtain-open.png'
 import curtainClosedSheet from '../assets/sprites/curtain/curtain.png'
 import elliIdleSheet from '../assets/sprites/elli/animation-idle-desk.png'
+import airconSheet from '../assets/sprites/aircon.png'
+import pumpkinSheet from '../assets/sprites/golden-pumpkin.png'
 import musicBoxSheet from '../assets/sprites/music-box.png'
 import ringLightSheet from '../assets/sprites/streaming-ring-light.png'
 import luluGroomSheet from '../assets/sprites/lulu/animation-grooming.png'
@@ -314,8 +316,27 @@ export const sprites = {
     iterations: 1,
     label: 'Curtain drawn shut',
   },
-  /* Room furniture. Both are single frames whose art reaches the bottom
-     of the cell, so neither needs a footing offset. */
+  /* Room furniture. Single frames, all of them. */
+  'props/pumpkin': {
+    src: pumpkinSheet,
+    frameWidth: 64,
+    frameHeight: 64,
+    columns: 1,
+    rows: 1,
+    frames: 1,
+    duration: 0,
+    label: 'A golden pumpkin, half hidden behind the curtain',
+  },
+  'props/aircon': {
+    src: airconSheet,
+    frameWidth: 128,
+    frameHeight: 64,
+    columns: 1,
+    rows: 1,
+    frames: 1,
+    duration: 0,
+    label: 'An air conditioner mounted high on the wall',
+  },
   'props/music-box': {
     src: musicBoxSheet,
     frameWidth: 128,

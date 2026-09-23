@@ -26,6 +26,12 @@ interface WallWindowProps {
   /** Click count. Odd means the curtain is open. */
   toggles: number
   onToggle: () => void
+  /**
+   * Anything to tuck between the glass and the drapes — visible only in
+   * the gap once the curtain is drawn back, and covered completely when
+   * it is shut.
+   */
+  children?: React.ReactNode
 }
 
 /**
@@ -39,7 +45,7 @@ interface WallWindowProps {
  * the shut sheet covers the glass completely — the open animation only
  * draws the drapes aside, and anything wider would still be showing.
  */
-export function WallWindow({ side, toggles, onToggle }: WallWindowProps) {
+export function WallWindow({ side, toggles, onToggle, children }: WallWindowProps) {
   const open = toggles % 2 === 1
   const [phase, setPhase] = useState<Phase>('shut')
   const [latched, setLatched] = useState(toggles)
@@ -85,24 +91,31 @@ export function WallWindow({ side, toggles, onToggle }: WallWindowProps) {
   }, [phase])
 
   return (
-    <button
-      type="button"
-      className={`wall-window wall-window--${side}`}
-      data-open={open || undefined}
-      onClick={onToggle}
-      aria-label={open ? `Close the ${side} curtain` : `Open the ${side} curtain`}
-      aria-pressed={open}
-    >
-      {/* First, so the frame and the drapes both paint over it. The beam
-          is a clipped shape with a squared-off head; hiding that head
-          behind the window is what makes the light read as coming out of
-          the opening rather than as a shape laid on top of it. */}
-      <span className="wall-window__ray" aria-hidden="true" />
+    /* A container rather than a button: whatever is hidden in the window
+       is itself clickable, and a button cannot contain another one. */
+    <div className={`wall-window wall-window--${side}`} data-open={open || undefined}>
+      <button
+        type="button"
+        className="wall-window__toggle"
+        onClick={onToggle}
+        aria-label={open ? `Close the ${side} curtain` : `Open the ${side} curtain`}
+        aria-pressed={open}
+      >
+        {/* First, so the frame and the drapes both paint over it. The beam
+            is a clipped shape with a squared-off head; hiding that head
+            behind the window is what makes the light read as coming out
+            of the opening rather than as a shape laid on top of it. */}
+        <span className="wall-window__ray" aria-hidden="true" />
 
-      <span className="wall-window__frame">
-        <span className="wall-window__pane" />
-        <span className="wall-window__pane" />
-      </span>
+        <span className="wall-window__frame">
+          <span className="wall-window__pane" />
+          <span className="wall-window__pane" />
+        </span>
+      </button>
+
+      {/* Above the toggle so it takes its own clicks, below the curtain
+          so the drapes still cover it. */}
+      {children}
 
       <Sprite
         key={take}
@@ -110,6 +123,6 @@ export function WallWindow({ side, toggles, onToggle }: WallWindowProps) {
         className="wall-window__curtain"
         iterations={phase === 'shut' || phase === 'opened' ? 'infinite' : 1}
       />
-    </button>
+    </div>
   )
 }

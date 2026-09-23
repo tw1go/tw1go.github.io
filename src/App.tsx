@@ -14,6 +14,7 @@ import {
 import { MusicNotes } from './features/spotify/MusicNotes'
 import { NowPlaying } from './features/spotify/NowPlaying'
 import { ArtistShowcase } from './features/showcase/ArtistShowcase'
+import { PumpkinReveal } from './features/pumpkin/PumpkinReveal'
 import { useNowPlaying } from './features/spotify/useNowPlaying'
 import { useCharacterAnimation } from './hooks/useCharacterAnimation'
 import { playDuration } from './sprites/manifest'
@@ -71,6 +72,10 @@ function App() {
   }, [talks])
   const closeElli = useCallback(() => setElliSays(null), [])
 
+  const [pumpkin, setPumpkin] = useState(false)
+  const foundPumpkin = useCallback(() => setPumpkin(true), [])
+  const closePumpkin = useCallback(() => setPumpkin(false), [])
+
   // The jukebox's record rack.
   const [showcase, setShowcase] = useState(false)
   const openShowcase = useCallback(() => setShowcase(true), [])
@@ -126,7 +131,22 @@ function App() {
       {/* Behind the glow, so the monitor spill washes across them the way
           it does the rest of the wall. */}
       <div className="scene__wall" aria-hidden="true">
-        <WallWindow side="left" toggles={curtains.left} onToggle={openLeft} />
+        <Sprite name="props/aircon" className="scene__aircon" />
+
+
+        <WallWindow side="left" toggles={curtains.left} onToggle={openLeft}>
+          {/* Hidden behind the shut curtain; a sliver shows against the
+              glass once the drapes are drawn back, and only then does it
+              take a click. */}
+          <button
+            type="button"
+            className="wall-window__secret"
+            onClick={foundPumpkin}
+            aria-label="A golden pumpkin"
+          >
+            <Sprite name="props/pumpkin" />
+          </button>
+        </WallWindow>
         <WallWindow side="right" toggles={curtains.right} onToggle={openRight} />
 
       </div>
@@ -206,6 +226,8 @@ function App() {
       <NowPlaying state={nowPlaying} />
 
       {showcase && <ArtistShowcase onClose={closeShowcase} />}
+
+      {pumpkin && <PumpkinReveal onClose={closePumpkin} />}
 
       {elliSays && (
         <InteractionBox

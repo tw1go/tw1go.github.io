@@ -66,6 +66,35 @@ export const DIALOG_LINES: Record<string, string[]> = {
 export const LULU_INTRO =
   "That's Lulu, twigo's cat — and the actual owner of this desk."
 
+/** What the pumpkin says to whoever disturbs it. */
+export const PUMPKIN_SPEAKER = 'Biiiko Kalabasa'
+
+const PUMPKIN_OPENER = "You've been pumpkined by the legendary Biiiko Kalabasa."
+
+/**
+ * The curse itself, drawn at random. Small and petty on purpose — a
+ * curse you would genuinely resent is funnier than a dramatic one.
+ */
+const PUMPKIN_CURSES = [
+  "Now you're cursed to plug every USB in the wrong way round. Twice. Every time.",
+  'Now every notification you hear will belong to somebody else\u2019s phone.',
+  'Now your headphone cable will find something to catch on. It will always find something.',
+  'Now every chair you sit in is set to the wrong height by exactly one notch.',
+  "Now you'll remember the word you were reaching for four hours after you stopped needing it.",
+  'Now every queue you join becomes the slow one. Including this one.',
+  'Now your phone hits one percent at the precise moment it matters.',
+  "Now you'll wave back at someone who was waving at the person behind you.",
+  'Now every pen you pick up writes for exactly two words.',
+  'Now one sock is always faintly damp, and nobody will ever believe you.',
+  'Now the bag of crisps opens from the bottom. Every bag. Forever.',
+  "Now you'll reach the top of the stairs and forget entirely why you went up.",
+]
+
+export function pickPumpkinCurse(): string {
+  const curse = PUMPKIN_CURSES[Math.floor(Math.random() * PUMPKIN_CURSES.length)]
+  return `${PUMPKIN_OPENER} ${curse}`
+}
+
 /**
  * For when someone will not stop poking the cat. Read in order, so it
  * escalates the longer it goes on; the last one repeats.

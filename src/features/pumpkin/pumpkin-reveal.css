@@ -1,0 +1,136 @@
+/* ============================================================
+   Pumpkin reveal
+   ------------------------------------------------------------
+   The easter egg's payoff: the pumpkin is lifted out of the
+   window to the front of the room and shakes at you.
+   ============================================================ */
+
+.pumpkin-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--px-8);
+  padding: var(--px-8) var(--px-6);
+
+  background: rgb(0 0 0 / 0.74);
+  cursor: pointer;
+  animation: pumpkin-backdrop 240ms ease-out both;
+}
+
+@keyframes pumpkin-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Thrown up out of the window and overshooting slightly, the way
+   something being held up for a look does. */
+.pumpkin-reveal__rise {
+  position: relative;
+  display: grid;
+  place-items: center;
+  animation: pumpkin-rise 560ms cubic-bezier(0.18, 1.5, 0.5, 1) both;
+}
+
+@keyframes pumpkin-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26vh) scale(0.2) rotate(-24deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+/* Treasure light. Sat behind the pumpkin rather than applied to it, so
+   the sprite's own pixels stay hard-edged. */
+.pumpkin-reveal__glow {
+  position: absolute;
+  width: 150%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(255 196 84 / 0.34),
+    rgb(255 170 50 / 0.12) 48%,
+    transparent 72%
+  );
+  animation: pumpkin-shine 2.4s ease-in-out infinite;
+}
+
+@keyframes pumpkin-shine {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The twitch. Stepped, so it snaps between poses like the rest of the
+   room rather than easing between them. */
+.pumpkin-reveal__twitch {
+  animation: pumpkin-twitch 420ms steps(1, jump-end) infinite;
+}
+
+@keyframes pumpkin-twitch {
+  0% {
+    transform: rotate(0deg) translate(0, 0);
+  }
+  25% {
+    transform: rotate(-3deg) translate(-2px, -3px);
+  }
+  50% {
+    transform: rotate(2deg) translate(2px, 1px);
+  }
+  75% {
+    transform: rotate(-1deg) translate(-1px, -2px);
+  }
+}
+
+.pumpkin-reveal .pumpkin-reveal__art {
+  --sprite-scale: calc(var(--scene-scale) * 1.4);
+  display: block;
+}
+
+/* Back down where it came from. Separate keyframes rather than the rise
+   reversed: reusing an animation-name keeps the finished instance and
+   its elapsed time, which snaps straight to the far end. */
+.pumpkin-reveal[data-closing] {
+  animation: pumpkin-backdrop 300ms ease-in reverse forwards;
+  pointer-events: none;
+}
+
+.pumpkin-reveal[data-closing] .pumpkin-reveal__rise {
+  animation: pumpkin-drop 300ms ease-in forwards;
+}
+
+@keyframes pumpkin-drop {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(18vh) scale(0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pumpkin-reveal,
+  .pumpkin-reveal__rise,
+  .pumpkin-reveal__twitch,
+  .pumpkin-reveal__glow {
+    animation: none;
+  }
+}
