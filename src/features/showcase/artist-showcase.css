@@ -88,17 +88,49 @@
   }
 }
 
-/* Closing: the same flight, played backwards, so every record returns to
-   the jukebox it came from. Quicker than the way out — an exit that
-   takes as long as the entrance feels like being held up. */
+/* Closing: the flight in reverse, so every record returns to the jukebox
+   it came from. Quicker than the way out — an exit that takes as long as
+   the entrance feels like being held up.
+
+   These are separate keyframes rather than `vinyl-fly` with
+   `direction: reverse`. Reusing an animation-name does not restart the
+   animation: the browser keeps the existing instance along with its
+   elapsed time, which is already past the end, so reversing it snapped
+   straight to the far end and the records simply vanished. A different
+   name is a different animation, and starts from zero. */
 .showcase[data-closing] {
-  animation: showcase-in 300ms ease-in reverse forwards;
+  /* Held at full strength until the records are nearly home, so they are
+     not fading out while they are still crossing the room. */
+  animation: showcase-out 280ms ease-in 300ms forwards;
   pointer-events: none;
 }
 
 .showcase[data-closing] .showcase__slot {
-  animation: vinyl-fly 380ms cubic-bezier(0.5, 0, 0.9, 0.4) reverse both;
-  animation-delay: calc(var(--i) * 16ms);
+  animation: vinyl-fly-back 420ms cubic-bezier(0.5, 0, 0.9, 0.4) forwards;
+  animation-delay: calc(var(--i) * 18ms);
+}
+
+@keyframes vinyl-fly-back {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--from-x), var(--from-y)) rotate(var(--spin)) scale(0.25);
+  }
+}
+
+@keyframes showcase-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .vinyl {

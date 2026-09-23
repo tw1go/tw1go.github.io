@@ -6,7 +6,7 @@ import './artist-showcase.css'
 
 const INTRO = 'twigo has been listening to these artists frequently.'
 /** Kept in sync with the closing animation in the CSS. */
-const OUT_MS = 540
+const OUT_MS = 620
 
 /**
  * Sleeve colours, assigned by position so a given record always keeps its
