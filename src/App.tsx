@@ -1,6 +1,16 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Sprite } from './components/Sprite'
+import { WallWindow } from './components/WallWindow'
+import { Elli } from './features/companion/Elli'
+import { Lulu } from './features/companion/Lulu'
 import { DialogBubble } from './features/dialog/DialogBubble'
+import { InteractionBox } from './features/dialog/InteractionBox'
+import {
+  ELLI_INTRO,
+  LULU_INTRO,
+  LULU_PESTER,
+  pickLine,
+} from './features/dialog/lines'
 import { MusicNotes } from './features/spotify/MusicNotes'
 import { NowPlaying } from './features/spotify/NowPlaying'
 import { useNowPlaying } from './features/spotify/useNowPlaying'
@@ -13,6 +23,9 @@ interface Dialog {
   text: string
   hold: number
 }
+
+/** Clicks closer together than this count as pestering the cat. */
+const PESTER_MS = 1500
 
 function App() {
   const play = useCharacterAnimation()
@@ -37,8 +50,81 @@ function App() {
 
   const clearDialog = useCallback(() => setDialog(null), [])
 
+  // Elli's line lives here rather than inside her, so clicking her again
+  // while the box is open swaps the line — the id remounts the box and
+  // restarts the crawl.
+  const [elliSays, setElliSays] = useState<{ id: number; text: string } | null>(null)
+  // Counts clicks for the life of the page, so it doubles as the remount
+  // key and as the test for "has she introduced herself yet". Deriving
+  // that from `elliSays` would not work: the box is cleared on close, so
+  // the next click would look like the first one all over again.
+  const [talks, setTalks] = useState(0)
+
+  const talkToElli = useCallback(() => {
+    setTalks((count) => count + 1)
+    setElliSays({
+      id: talks + 1,
+      // She introduces herself once, then falls back to small talk.
+      text: talks === 0 ? ELLI_INTRO : (pickLine('elli/idle') ?? ''),
+    })
+  }, [talks])
+  const closeElli = useCallback(() => setElliSays(null), [])
+
+  // Lulu's counters are refs rather than state: the streak has to be read
+  // and written inside a single handler, and a setState would not have
+  // applied in time to choose the line.
+  const luluSeen = useRef(0)
+  const luluStreak = useRef(0)
+  const luluLastAt = useRef(0)
+
+  // One click count per window. Odd means its curtain is open, and the
+  // count doubles as the sprite key so each toggle restarts the
+  // animation rather than retiming the one already running.
+  const [curtains, setCurtains] = useState({ left: 0, right: 0 })
+  const toggleCurtain = useCallback((side: 'left' | 'right') => {
+    setCurtains((prev) => ({ ...prev, [side]: prev[side] + 1 }))
+  }, [])
+  const openLeft = useCallback(() => toggleCurtain('left'), [toggleCurtain])
+  const openRight = useCallback(() => toggleCurtain('right'), [toggleCurtain])
+  // 0 dark, 1 half lit, 2 full daylight.
+  const light = (curtains.left % 2) + (curtains.right % 2)
+
+  // Set on <html> rather than on the scene: the room's colour lives on
+  // the page background, which no descendant can reach.
+  useEffect(() => {
+    document.documentElement.dataset.light = String(light)
+  }, [light])
+
+  const talkAboutLulu = useCallback((resting: boolean) => {
+    const now = Date.now()
+    luluStreak.current =
+      now - luluLastAt.current < PESTER_MS ? luluStreak.current + 1 : 0
+    luluLastAt.current = now
+
+    const streak = luluStreak.current
+    const text =
+      streak > 0
+        ? // Escalates while the clicking keeps up, then holds on the last one.
+          LULU_PESTER[Math.min(streak - 1, LULU_PESTER.length - 1)]
+        : luluSeen.current === 0
+          ? // Introducing her wins even if she is fast asleep.
+            LULU_INTRO
+          : (pickLine(resting ? 'lulu-resting' : 'lulu') ?? '')
+    luluSeen.current += 1
+
+    setElliSays((prev) => ({ id: (prev?.id ?? 0) + 1, text }))
+  }, [])
+
   return (
     <main className="scene">
+      {/* Behind the glow, so the monitor spill washes across them the way
+          it does the rest of the wall. */}
+      <div className="scene__wall" aria-hidden="true">
+        <WallWindow side="left" toggles={curtains.left} onToggle={openLeft} />
+        <WallWindow side="right" toggles={curtains.right} onToggle={openRight} />
+
+      </div>
+
       {/* Light spill from the monitors — the only thing on in the room. */}
       <div className="scene__glow" aria-hidden="true" />
       <div className="scene__floor" aria-hidden="true" />
@@ -68,6 +154,31 @@ function App() {
         )}
       </div>
 
+      {/* Furniture. Above the stage, so the desk does not paint over it
+          the way it does the wall. The jukebox reacts to playback, so the
+          layer carries the state. */}
+      <div
+        className="scene__props"
+        aria-hidden="true"
+        data-playing={nowPlaying.status === 'playing' || undefined}
+      >
+        <Sprite name="props/ring-light" className="scene__ring-light" />
+        <Sprite name="props/music-box" className="scene__music-box" />
+      </div>
+
+      {/* Elli sits on the desk in her own layer, for the same reason as
+          the dialog — inside the stage she would be trapped in that
+          element's stacking context. */}
+      <div className="scene__companion">
+        <Elli onTalk={talkToElli} />
+      </div>
+
+      {/* Lulu roams between the floor and the desk, so she needs the
+          whole frame rather than the companion layer's fixed spot. */}
+      <div className="scene__pets">
+        <Lulu onPet={talkAboutLulu} />
+      </div>
+
       {/* Its own layer for the same reason as the dialog: inside the stage
           the notes would be trapped in that stacking context. */}
       {nowPlaying.status === 'playing' && (
@@ -81,6 +192,16 @@ function App() {
       </p>
 
       <NowPlaying state={nowPlaying} />
+
+      {elliSays && (
+        <InteractionBox
+          key={elliSays.id}
+          speaker="Elli"
+          portrait="elli/portrait"
+          text={elliSays.text}
+          onClose={closeElli}
+        />
+      )}
     </main>
   )
 }

@@ -1,0 +1,116 @@
+/* Elli, the desk companion.
+
+   Placed from measurements taken off the character sheet rather than by
+   eye: in the 256px frame the right monitor occupies columns 149-178 and
+   rows 98-123, so its centre line is 63.9% across and the surface it
+   stands on is row 124 — 51.6% up from the frame's bottom edge. */
+.elli {
+  /* How big Elli draws, as a fraction of her source art, and the knob to
+     turn to resize her. 1 is the sweet spot: one source pixel per screen
+     pixel, so the sheet is drawn exactly as authored with no resampling
+     at all — any other value drops or repeats pixels. */
+  --elli-size: 1;
+  /* Dividing by 5 — the top --scene-scale — keeps her shrinking in step
+     with the room at the smaller breakpoints. */
+  --elli-scale: calc(var(--elli-size) * var(--scene-scale) / 5);
+
+  position: absolute;
+  left: 65.6%;
+  /* Her art ends at row 59 of the 64px cell, so the box drops by those
+     four empty rows to put her feet on the line rather than above it. */
+  bottom: calc(51.6% - 4px * var(--elli-scale));
+  transform: translateX(-50%);
+
+  /* The layer she sits in is pointer-events: none so the room stays
+     click-through. Elli is the one thing in it that opts back in. */
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Out-specifies `.sprite`'s own `--sprite-scale: 1`, which would
+   otherwise tie on specificity and be settled by stylesheet order. */
+.elli .elli__sprite {
+  display: block;
+  --sprite-scale: var(--elli-scale);
+}
+
+.elli:hover .elli__sprite,
+.elli:focus-visible .elli__sprite {
+  filter: brightness(1.18);
+}
+
+.elli:focus-visible {
+  outline: var(--px) solid var(--color-highlight);
+  outline-offset: var(--px);
+}
+
+/* The badge sits above her head, outside the sprite's own box. */
+.elli__badge {
+  --badge-outline: #0b0d14;
+  /* The ring has to be a fraction of the glyph, not a whole room pixel:
+     the "!" stem is only a few pixels wide, so a full-pixel ring closes
+     over it and the mark reads as a slab instead of an outlined glyph. */
+  --badge-ring: calc(var(--scene-pixel) * 0.4);
+
+  position: absolute;
+  left: 50%;
+  /* Measured from the top of her head, not the top of her box. Her art
+     starts 5 rows down inside the 64px cell, so a gap set from the box
+     edge would silently carry those empty rows with it — which is what
+     left the mark floating. Subtract them, then add the gap that should
+     actually show. */
+  --badge-gap: 3px;
+  bottom: calc(100% - (5px - var(--badge-gap)) * var(--elli-scale));
+  transform: translateX(-50%);
+
+  font-family: var(--font-display);
+  font-size: calc(var(--scene-pixel) * 7);
+  line-height: 1;
+  color: var(--color-alert);
+
+  /* A ring rather than a drop shadow: eight copies offset by one room
+     pixel in every direction, so the outline closes all the way round.
+     Offsets with no blur keep it hard-edged, and the dark ring is what
+     makes the mark read against both the lit monitor behind her and the
+     dark room either side of it. */
+  text-shadow:
+    var(--badge-ring) 0 0 var(--badge-outline),
+    calc(var(--badge-ring) * -1) 0 0 var(--badge-outline),
+    0 var(--badge-ring) 0 var(--badge-outline),
+    0 calc(var(--badge-ring) * -1) 0 var(--badge-outline),
+    var(--badge-ring) var(--badge-ring) 0 var(--badge-outline),
+    var(--badge-ring) calc(var(--badge-ring) * -1) 0 var(--badge-outline),
+    calc(var(--badge-ring) * -1) var(--badge-ring) 0 var(--badge-outline),
+    calc(var(--badge-ring) * -1) calc(var(--badge-ring) * -1) 0
+      var(--badge-outline);
+
+  /* Stepped rather than eased: it snaps between two positions on the
+     pixel grid instead of sliding between them. */
+  animation: elli-badge-bob 760ms steps(1, jump-end) infinite;
+}
+
+/* Once met it stops shouting — grey and still, but still clickable. */
+.elli__badge--seen {
+  color: var(--color-text-dim);
+  animation: none;
+}
+
+@keyframes elli-badge-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, calc(var(--scene-pixel) * -1));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .elli__badge {
+    animation: none;
+  }
+}

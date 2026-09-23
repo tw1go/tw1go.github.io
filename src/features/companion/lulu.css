@@ -1,0 +1,63 @@
+/* Lulu the cat.
+
+   Positioned inside a layer that mirrors the character's 256px frame, so
+   every percentage here is a fraction of the room rather than of the
+   viewport, and she keeps her footing at every breakpoint. */
+.lulu {
+  /* 0.6 of the room's scale puts her at roughly 28 art pixels tall
+     against the seated character's 87 — cat-sized. A whole multiple of
+     the scene scale, so the upscale stays nearest-neighbour and square. */
+  --lulu-scale: calc(var(--scene-scale) * 0.6);
+
+  position: absolute;
+  left: var(--lulu-x);
+  /* All three sheets leave exactly 12 cell rows below the art, so one
+     offset drops her feet onto the line for every animation. */
+  bottom: calc(var(--lulu-bottom) - 12px * var(--lulu-scale));
+  /* Every sheet is drawn facing right; -1 flips her to walk left. */
+  transform: translateX(-50%) scaleX(var(--lulu-face));
+
+  transition:
+    left var(--lulu-move) linear,
+    bottom var(--lulu-move) linear;
+
+  /* Her layer is pointer-events: none so the room stays click-through;
+     she opts back in. */
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lulu:focus-visible {
+  outline: var(--px) solid var(--color-highlight);
+  outline-offset: calc(var(--px) * -2);
+}
+
+/* Out-specifies `.sprite`'s own `--sprite-scale: 1`. */
+.lulu .lulu__sprite {
+  display: block;
+  --sprite-scale: var(--lulu-scale);
+}
+
+/* Jumping up decelerates into the landing; dropping down accelerates.
+   Same curve either way would read as floating. */
+.lulu[data-jump='desk'] {
+  transition:
+    left var(--lulu-move) linear,
+    bottom var(--lulu-move) cubic-bezier(0.2, 0.8, 0.35, 1);
+}
+
+.lulu[data-jump='floor'] {
+  transition:
+    left var(--lulu-move) linear,
+    bottom var(--lulu-move) cubic-bezier(0.5, 0, 0.85, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lulu {
+    transition: none;
+  }
+}

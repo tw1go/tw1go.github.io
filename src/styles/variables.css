@@ -22,6 +22,13 @@
   /* ── Surfaces ───────────────────────────────────────────── */
   /* The room is unlit — true black, not ink. Ink is the UI surface. */
   --color-room: #000;
+  /* The vignette: how black the edges go, and where the fall-off starts
+     and finishes. The corner of a 16:9 viewport only sits about 65% of
+     the way along this gradient, so the end stop has to come in well
+     before 100% for the corners to actually reach full dark. */
+  --room-vignette: 0.85;
+  --room-vignette-in: 40%;
+  --room-vignette-out: 100%;
   --color-bg: var(--twigo-ink);
   --color-bg-deep: color-mix(in srgb, var(--twigo-ink) 80%, black);
   --color-surface: color-mix(in srgb, var(--twigo-ink) 88%, white);
@@ -46,6 +53,8 @@
   --color-secondary: var(--twigo-magenta);
   --color-highlight: var(--twigo-lime);
   --color-success: var(--twigo-green);
+  /* Attention, not danger — used by Elli's unclicked badge. */
+  --color-alert: #ef4444;
 
   /* ── Gradients ──────────────────────────────────────────── */
   --gradient-brand: linear-gradient(

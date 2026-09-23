@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 /** Shortest time a finished line stays up before it starts erasing. */
 const MIN_HOLD_MS = 600
@@ -115,4 +115,78 @@ export function useTypeInOut(
 
   // Reduced motion gets the whole line at once, no reveal and no erase.
   return reduced ? text : typed
+}
+
+interface TypeInOptions {
+  /** Milliseconds per character. */
+  speed?: number
+  /** Wait before the first character, so typing follows the entrance. */
+  startDelay?: number
+}
+
+export interface TypeIn {
+  typed: string
+  /** True once the whole line is on screen. */
+  done: boolean
+  /** Finish immediately — the usual "click to skip the crawl". */
+  skip: () => void
+}
+
+/**
+ * Types `text` in and leaves it there.
+ *
+ * Unlike `useTypeInOut` there is no hold and no erase: the caller decides
+ * when the line goes away. `skip` exists because making someone wait out
+ * a crawl they have already read is the most irritating thing a dialog
+ * box can do.
+ */
+export function useTypeIn(
+  text: string,
+  { speed = 30, startDelay = 0 }: TypeInOptions = {},
+): TypeIn {
+  const reduced = prefersReducedMotion()
+  const [typed, setTyped] = useState('')
+  const [typingFor, setTypingFor] = useState(text)
+  // Held so `skip` can stop the run in flight without the effect
+  // depending on it and restarting the whole crawl.
+  const timers = useRef<{ start?: number; tick?: number }>({})
+
+  // Rewind when the line changes. Done during render rather than in an
+  // effect so there is no frame showing the previous line's characters.
+  if (typingFor !== text) {
+    setTypingFor(text)
+    setTyped('')
+  }
+
+  useEffect(() => {
+    if (reduced) return
+    const handles = timers.current
+    let index = 0
+
+    handles.start = window.setTimeout(() => {
+      handles.tick = window.setInterval(() => {
+        index += 1
+        setTyped(text.slice(0, index))
+        if (index >= text.length && handles.tick !== undefined) {
+          window.clearInterval(handles.tick)
+        }
+      }, speed)
+    }, startDelay)
+
+    return () => {
+      if (handles.start !== undefined) window.clearTimeout(handles.start)
+      if (handles.tick !== undefined) window.clearInterval(handles.tick)
+    }
+  }, [text, speed, startDelay, reduced])
+
+  const skip = useCallback(() => {
+    const handles = timers.current
+    if (handles.start !== undefined) window.clearTimeout(handles.start)
+    if (handles.tick !== undefined) window.clearInterval(handles.tick)
+    setTyped(text)
+  }, [text])
+
+  // Reduced motion gets the whole line at once, with no state involved.
+  const shown = reduced ? text : typed
+  return { typed: shown, done: shown.length >= text.length, skip }
 }

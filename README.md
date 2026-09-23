@@ -57,11 +57,17 @@ middleware in `vite.config.ts`. There is no second implementation to drift.
 4. **Deploy the function to Vercel.** Set `SPOTIFY_CLIENT_ID`,
    `SPOTIFY_CLIENT_SECRET` and `SPOTIFY_REFRESH_TOKEN` under Project
    Settings → Environment Variables.
-5. **Tell the Pages build where the function is.** In the GitHub repo,
-   Settings → Secrets and variables → Actions → *Variables*, add
-   `VITE_NOW_PLAYING_URL` = `https://<project>.vercel.app/api/now-playing`.
-   It is a repo *variable*, not a secret — it is baked into the public
-   bundle, which is fine.
+5. **Tell the Pages build where the function is.** `.env.production` is
+   committed and already holds it:
+   ```
+   VITE_NOW_PLAYING_URL=https://twigo-portfolio.vercel.app/api/now-playing
+   ```
+   It is not a secret — it is baked into the public bundle either way.
+   Note the `/api/now-playing` path: the bare domain serves the site's
+   HTML, which the client cannot parse as JSON. To point a fork somewhere
+   else, either edit that file or set a repository variable of the same
+   name under Settings → Secrets and variables → Actions → *Variables*,
+   which wins over the file.
 6. **Turn on Pages**: Settings → Pages → Source = *GitHub Actions*.
 
 Only `user-read-currently-playing` is requested. Adding a scope means

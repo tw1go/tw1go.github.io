@@ -1,0 +1,218 @@
+/* ============================================================
+   Interaction box
+   ------------------------------------------------------------
+   The panel along the bottom of the room. White, because it is
+   addressed to the viewer rather than being part of the dark
+   scene — it should read as an interface sitting over the room,
+   not as another object in it.
+   ============================================================ */
+
+.interaction {
+  --box-px: 4px;
+
+  position: absolute;
+  left: 50%;
+  /* Clears the now-playing strip below it rather than covering it. */
+  bottom: calc(var(--px-16) * 2);
+  transform: translateX(-50%);
+  /* Above the dialog layer (10), so nothing in the room paints over it. */
+  z-index: 12;
+
+  width: min(920px, 92vw);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--px-3);
+  padding: var(--px-4) var(--px-6) var(--px-6);
+
+  font-family: var(--font-body);
+  font-size: 1.375rem;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--twigo-ink);
+
+  background: #fff;
+  border: var(--box-px) solid var(--twigo-ink);
+  border-radius: calc(var(--box-px) * 3);
+  /* A violet ring just outside the ink border, then a hard offset shadow
+     with no blur — the same rule the rest of the room follows. */
+  box-shadow:
+    0 0 0 var(--box-px) var(--twigo-violet),
+    var(--px-3) var(--px-3) 0 0 rgb(0 0 0 / 0.55);
+
+  cursor: pointer;
+  /* Eased rather than stepped, unlike the room's own animations. This
+     panel is interface sitting over the scene rather than an object in
+     it — the same reasoning that makes it white — and a slide reads as
+     motion only if it actually travels. */
+  animation: interaction-in 200ms ease-out both;
+}
+
+/* Slides down and fades on the way out. Driven by the attribute so the
+   component controls the timing, with OUT_MS kept in step with this. */
+.interaction[data-closing] {
+  animation: interaction-out 220ms ease-in forwards;
+  /* Nothing should be clickable while it is leaving. */
+  pointer-events: none;
+}
+
+.interaction:focus-visible {
+  outline: var(--box-px) solid var(--twigo-lime);
+  outline-offset: var(--px-2);
+}
+
+/* Portrait perched on the top-right corner, breaking out over the
+   panel's edge so it reads as leaning on the box rather than being
+   boxed in. The panel is `overflow: visible`, which is what lets it. */
+.interaction__portrait {
+  /* Against the 256px cells of the portrait sheet. A clean half, so the
+     nearest-neighbour downscale drops every other pixel evenly rather
+     than in clumps. */
+  --portrait-scale: 0.5;
+  /* How far the sprite's own bottom edge sits below the panel's top. */
+  --portrait-dip: 48px;
+
+  position: absolute;
+  right: var(--px-6);
+  bottom: calc(100% - var(--portrait-dip));
+  pointer-events: none;
+}
+
+/* Out-specifies `.sprite`'s own `--sprite-scale: 1`. */
+.interaction__portrait .sprite {
+  display: block;
+  --sprite-scale: var(--portrait-scale);
+}
+
+/* Keep the text clear of the portrait rather than letting a long line
+   run underneath it. */
+.interaction--portrait {
+  padding-right: calc(var(--px-16) * 2);
+}
+
+/* Name tag. Reads as a label on the panel rather than as dialogue. */
+.interaction__name {
+  padding: var(--px) var(--px-3);
+  background: var(--twigo-violet);
+  border-radius: var(--box-px);
+  color: #fff;
+  font-size: 0.9375rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.interaction__text {
+  display: block;
+  /* Long lines wrap inside the panel instead of stretching it. */
+  max-width: 100%;
+}
+
+/* Matches the speech bubble's caret, inverted for a light panel. */
+.interaction__caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.9em;
+  margin-left: 0.12em;
+  vertical-align: -0.08em;
+  background: var(--twigo-violet);
+  animation: interaction-blink 560ms steps(1, jump-end) infinite;
+}
+
+/* "There is more" arrow, drawn with the same stepped polygon as the
+   speech bubble's tail so the diagonal stays hard-edged.
+
+   Pinned to the corner rather than laid out in the flow: as a flex item
+   it sat inside the panel's padding, which the portrait widens on the
+   right, so it drifted well clear of the edge it is meant to mark. */
+.interaction__more {
+  position: absolute;
+  right: var(--px-4);
+  bottom: var(--px-3);
+  width: calc(var(--box-px) * 4);
+  height: calc(var(--box-px) * 2);
+  background: var(--twigo-violet);
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% 33.33%,
+    83.33% 33.33%,
+    83.33% 66.66%,
+    66.66% 66.66%,
+    66.66% 100%,
+    33.33% 100%,
+    33.33% 66.66%,
+    16.66% 66.66%,
+    16.66% 33.33%,
+    0% 33.33%
+  );
+  animation: interaction-blink 700ms steps(1, jump-end) infinite;
+}
+
+@keyframes interaction-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes interaction-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(var(--px-4));
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes interaction-out {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(var(--px-12));
+  }
+}
+
+/* The room steps down its pixel grid at these widths; the panel follows
+   so it never crowds the character. */
+@media (max-width: 900px) {
+  .interaction {
+    font-size: 1.125rem;
+    bottom: calc(var(--px-16) * 1.75);
+  }
+}
+
+@media (max-width: 700px) {
+  .interaction {
+    font-size: 1rem;
+    padding: var(--px-3) var(--px-4) var(--px-4);
+    bottom: calc(var(--px-16) * 1.5);
+  }
+
+  /* A 128px portrait would eat most of a phone-width panel. */
+  .interaction__portrait {
+    --portrait-scale: 0.28;
+    --portrait-dip: 28px;
+  }
+
+  .interaction--portrait {
+    padding-right: var(--px-16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interaction,
+  .interaction__caret,
+  .interaction__more {
+    animation: none;
+  }
+}

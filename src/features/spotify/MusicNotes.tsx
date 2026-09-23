@@ -3,7 +3,7 @@ import noteTrio from '../../assets/sprites/music/music-note-2-pixel.png'
 import './music-notes.css'
 
 /**
- * Notes drifting up off the character while Spotify is playing.
+ * Notes drifting up off the jukebox while Spotify is playing.
  *
  * Each note carries its own sprite, start offset, drift, scale and delay
  * as custom properties, so one keyframe drives all of them. Staggering the
@@ -29,14 +29,15 @@ const SPRITES = {
    in `translate()` resolves against the element's own box, so on a 50px
    note it would amount to a pixel or two and read as straight up.
 
-   The x values sit just off the character's left shoulder — the art
-   occupies columns 34-220 of the 256px frame, so its own left edge is
-   around 38%. */
+   The x values are centres, straddling the jukebox, whose cabinet runs
+   from about 2% to 12% of the frame with its middle at 7%. Drift leans
+   right, into the room, because the cabinet sits close enough to the
+   left edge that a hard leftward drift would take notes off frame. */
 const NOTES = [
-  { id: 1, sprite: 'cluster', x: '38%', drift: -0.05, scale: 0.7, delay: '0s', duration: '7.5s' },
-  { id: 2, sprite: 'trio', x: '43%', drift: -0.085, scale: 0.85, delay: '1.9s', duration: '8.5s' },
-  { id: 3, sprite: 'trio', x: '40%', drift: -0.06, scale: 0.5, delay: '3.6s', duration: '9.5s' },
-  { id: 4, sprite: 'cluster', x: '45%', drift: -0.1, scale: 0.75, delay: '5.2s', duration: '8s' },
+  { id: 1, sprite: 'cluster', x: '6%', drift: -0.015, scale: 0.7, delay: '0s', duration: '7.5s' },
+  { id: 2, sprite: 'trio', x: '8%', drift: 0.05, scale: 0.85, delay: '1.9s', duration: '8.5s' },
+  { id: 3, sprite: 'trio', x: '7%', drift: 0.025, scale: 0.5, delay: '3.6s', duration: '9.5s' },
+  { id: 4, sprite: 'cluster', x: '9%', drift: 0.07, scale: 0.75, delay: '5.2s', duration: '8s' },
 ] as const
 
 export function MusicNotes() {

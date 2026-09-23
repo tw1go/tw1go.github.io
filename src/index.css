@@ -7,6 +7,33 @@
   box-sizing: border-box;
 }
 
+/* Daylight through the wall windows. Lifting the room's own colour keeps
+   the scene's contrast intact — a translucent white sheet over the whole
+   page washes the pixel art out and fogs the text along with it.
+
+   Neutral greys rather than warm ones: anything with yellow in it reads
+   as a brown wall at this lightness rather than as a lit one.
+
+   The vignette tightens as the room lifts rather than easing off. Left
+   as-is it would fade to nothing against a lighter wall — the same black
+   gradient that swallows the corners of an unlit room barely registers
+   against one that is lit, so it has to bite harder to stay visible. */
+html[data-light='1'] {
+  --color-room: #1b1d22;
+  --glow-strength: 0.55;
+  --room-vignette: 0.94;
+  --room-vignette-in: 30%;
+  --room-vignette-out: 86%;
+}
+
+html[data-light='2'] {
+  --color-room: #3c3f47;
+  --glow-strength: 0.25;
+  --room-vignette: 1;
+  --room-vignette-in: 24%;
+  --room-vignette-out: 78%;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
@@ -26,10 +53,11 @@ body {
     ),
     radial-gradient(
       120% 90% at 50% 45%,
-      transparent 40%,
-      rgb(0 0 0 / 0.85) 100%
+      transparent var(--room-vignette-in),
+      rgb(0 0 0 / var(--room-vignette)) var(--room-vignette-out)
     );
   background-attachment: fixed;
+  transition: background-color 1400ms ease-out;
 
   /* Pixel fonts must never be smoothed away. */
   -webkit-font-smoothing: none;

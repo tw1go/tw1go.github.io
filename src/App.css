@@ -66,6 +66,22 @@
   animation: glow-cycle 24s ease-in-out infinite;
 }
 
+/* Anything fixed to the back wall. Shares the sprite frame's box so the
+   windows keep their place relative to the room, not the viewport.
+
+   Behind everything in the room: the wall is the furthest thing back,
+   so the desk and the character pass in front of it. */
+.scene__wall {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* Monitor spill on the back wall. Shares the sprite frame's box so the
    glow stays sized to the character rather than to the viewport. */
 .scene__glow {
@@ -91,13 +107,16 @@
   animation: room-breathe 7s ease-in-out infinite;
 }
 
+/* Reads --glow-strength rather than using fixed values: the glow is
+   animated, so a plain `opacity` rule elsewhere could never win against
+   it. Daylight turns the strength down instead. */
 @keyframes room-breathe {
   0%,
   100% {
-    opacity: 0.75;
+    opacity: calc(0.75 * var(--glow-strength, 1));
   }
   50% {
-    opacity: 1;
+    opacity: var(--glow-strength, 1);
   }
 }
 
@@ -109,6 +128,10 @@
   height: var(--frame);
   transform: translateX(-50%);
   z-index: 1; /* stands on the floor, not behind it */
+  /* The sprite's box is the whole 256px frame, most of it transparent,
+     and it sits above the wall — so without this it swallows every click
+     aimed at the windows behind it. Nothing in here is interactive. */
+  pointer-events: none;
 }
 
 /* Scale is driven here rather than by the component so the 256px frame
@@ -116,6 +139,119 @@
    `--sprite-scale: 1`, which would otherwise beat an inherited value. */
 .scene__stage .sprite {
   --sprite-scale: var(--scene-scale);
+}
+
+/* Elli, the desk companion.
+
+   Everything here is measured off the character sheet rather than eyeballed.
+   In the 256px frame the right monitor occupies columns 149-178 and rows
+   98-123, so its centre line is 63.9% across and the desk surface it stands
+   on is row 124 — 51.6% up from the frame's bottom edge. */
+.scene__companion {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Lulu's roaming layer. Above the character so she reads as being in
+   front of the desk, below the dialog so nothing covers a speech box. */
+.scene__pets {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Room furniture. Above the stage so the desk surface does not cover it,
+   below the pets so Lulu walks in front. */
+.scene__props {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Sits on the desk itself — row 124 of the 256px frame, the same line the
+   monitor's base and the bottle stand on. Its art reaches the bottom of
+   its cell, so no footing offset is needed. */
+.scene__props .scene__ring-light {
+  --sprite-scale: calc(var(--scene-scale) * 0.4);
+
+  position: absolute;
+  /* Tucked in beside the left monitor, whose bezel starts at 38.7% of
+     the frame. It overlaps the bottle at 31% slightly and, being on a
+     layer above the stage, stands in front of it. */
+  left: 30%;
+  bottom: 51.5625%;
+  transform: translateX(-50%);
+}
+
+/* Stands on the floor just clear of the desk, which starts at 13% of the
+   frame, and further back than Lulu's ground line so it reads as being
+   against the wall rather than out in the room. */
+.scene__props .scene__music-box {
+  --sprite-scale: calc(var(--scene-scale) * 0.4);
+
+  position: absolute;
+  left: 7%;
+  /* Row 174 — the character's own ground line. Any higher and its feet
+     land above the wall/floor junction at the horizon, which is what
+     made it look like it was hanging on the wall. */
+  bottom: 32%;
+
+  /* Tilted back into the floor's perspective. The origin is its base, so
+     it pivots on its feet instead of sinking through them — the default
+     centre origin would drop the whole thing half its height. */
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotateX(40deg);
+
+  /* The cream cabinet is the brightest thing in an unlit room and pulled
+     the eye straight off the character. */
+  filter: brightness(0.8);
+}
+
+/* Working, while something is playing: a short rock on its feet and the
+   cabinet lighting up as it goes.
+
+   The keyframes have to restate the whole transform — an animation
+   replaces the property outright, so leaving out the tilt or the centring
+   would snap it upright and off to one side on the first frame. The bob
+   is applied before the rotate so it travels straight up the screen
+   rather than along the tilted axis. */
+.scene__props[data-playing] .scene__music-box {
+  animation: jukebox-playing 560ms steps(3, jump-none) infinite alternate;
+}
+
+@keyframes jukebox-playing {
+  0% {
+    transform: translateX(-50%) translateY(0) rotateX(40deg);
+    filter: brightness(0.8);
+  }
+  100% {
+    transform: translateX(-50%) translateY(calc(var(--scene-pixel) * -1))
+      rotateX(40deg);
+    filter: brightness(1.05)
+      drop-shadow(0 0 calc(var(--scene-pixel) * 3) rgb(255 206 122 / 0.45));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene__props[data-playing] .scene__music-box {
+    animation: none;
+  }
 }
 
 /* Music notes ride above the character but below the dialog, so a speech

@@ -13,10 +13,10 @@
 .music-notes__note {
   position: absolute;
   left: var(--n-x);
-  /* Level with the character's head: the art occupies rows 87-174 of the
-     256px frame, so 36% sits at the headphones rather than above them,
-     which keeps the notes starting on the character, not beside them. */
-  top: 36%;
+  /* Just clear of the jukebox's lid. Its base sits on row 174 and the
+     cabinet stands about 39 rows tall once the perspective tilt has
+     squashed it, which puts its top a little under 53% down the frame. */
+  top: 51%;
   height: calc(var(--scene-pixel) * 10);
   aspect-ratio: var(--note-aspect);
   background: var(--color-highlight);
@@ -30,9 +30,12 @@
 }
 
 @keyframes note-rise {
+  /* The -50% centres each note on its own x rather than hanging it off
+     to the right — `left` positions the note's left edge, and a note is
+     several percent of the frame wide. */
   0% {
     opacity: 0;
-    transform: translate(0, 0) scale(var(--n-scale));
+    transform: translate(-50%, 0) scale(var(--n-scale));
   }
   /* Up to full quickly, then a long slow fade for the rest of the climb —
      that asymmetry is what reads as drifting away rather than blinking. */
@@ -44,7 +47,7 @@
   100% {
     opacity: 0;
     transform: translate(
-        calc(var(--frame) * var(--n-drift)),
+        calc(-50% + var(--frame) * var(--n-drift)),
         calc(var(--frame) * -0.15)
       )
       scale(var(--n-scale));

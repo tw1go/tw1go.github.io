@@ -51,10 +51,19 @@ export function Sprite({
     '--sprite-frame-w': sprite.frameWidth,
     '--sprite-frame-h': sprite.frameHeight,
     '--sprite-cols': sprite.columns,
+    // The sheet's real row count. The stylesheet can only guess this from
+    // the frame count, which is wrong whenever the animation is a slice of
+    // a larger sheet.
+    '--sprite-rows': sprite.rows ?? Math.ceil(sprite.frames / sprite.columns),
     '--sprite-frames': sprite.frames,
+    '--sprite-first': sprite.firstFrame ?? 0,
     '--sprite-duration': `${duration ?? sprite.duration}ms`,
     '--sprite-iterations': `${cssIterations}`,
-    '--sprite-direction': sprite.pingPong ? 'alternate' : 'normal',
+    '--sprite-direction': sprite.pingPong
+      ? 'alternate'
+      : sprite.reverse
+        ? 'reverse'
+        : 'normal',
     ...(scale === undefined ? null : { '--sprite-scale': scale }),
   } as CSSProperties
 

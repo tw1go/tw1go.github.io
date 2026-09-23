@@ -1,0 +1,156 @@
+/* ============================================================
+   Wall windows
+   ------------------------------------------------------------
+   Night outside, so the glass is darker than the room rather
+   than brighter. Two panes with a sash bar down the middle:
+   the bar is the grid gap, so it stays exactly one room pixel
+   wide at every breakpoint.
+   ============================================================ */
+
+.wall-window {
+  --win-w: calc(var(--scene-pixel) * 40);
+  --win-h: calc(var(--scene-pixel) * 42);
+  /* Unlit timber — darker than the desk, which the monitors light. */
+  --win-frame: #1b1009;
+
+  position: absolute;
+  /* High on the wall, clear of the sign above and the desk below. */
+  top: 23%;
+  width: var(--win-w);
+  height: var(--win-h);
+
+  /* The wall layer is pointer-events: none so the room stays
+     click-through; the windows opt back in. */
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wall-window:focus-visible {
+  outline: var(--px) solid var(--color-highlight);
+  outline-offset: var(--px-2);
+}
+
+.wall-window--left {
+  left: 6%;
+  --ray-tilt: 15deg;
+}
+
+.wall-window--right {
+  right: 6%;
+  --ray-tilt: -15deg;
+}
+
+.wall-window__frame {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  /* One divider, vertical, down the middle — a sliding sash. */
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--scene-pixel);
+  padding: var(--scene-pixel);
+
+  background: var(--win-frame);
+  border: calc(var(--scene-pixel) * 2) solid var(--win-frame);
+
+  box-shadow:
+    /* Hard offset, no blur — the same rule the rest of the room follows. */
+    var(--scene-pixel) var(--scene-pixel) 0 0 rgb(0 0 0 / 0.5),
+    /* Just enough spill to say the glass is letting something through. */
+    0 0 calc(var(--scene-pixel) * 7) rgb(var(--twigo-violet-rgb) / 0.16);
+}
+
+/* A shaft of sunlight through the opening.
+
+   A radial glow was wrong here: it lit the wall above and to both sides
+   of the window, so the curtain appeared to be letting light round its
+   own edges. A beam only leaves through the gap, and only travels one
+   way — down into the room and inward, away from the wall it is on. */
+.wall-window__ray {
+  position: absolute;
+  /* Starts inside the opening rather than at the frame's edge. */
+  top: 30%;
+  left: 50%;
+  /* As wide as the window across the top, so the beam fills the opening
+     rather than threading through the middle of it. The drapes overlap
+     its head and mask whatever falls outside the gap. */
+  width: calc(var(--scene-pixel) * 84);
+  /* Long enough to reach the floor and fade there, rather than ending
+     somewhere in mid-air. */
+  height: calc(var(--scene-pixel) * 104);
+
+  /* Pivots about where it leaves the glass, so tilting it does not slide
+     the beam off the window. */
+  transform-origin: 50% 0;
+  transform: translateX(-50%) rotate(var(--ray-tilt));
+
+  /* Narrow at the glass, spreading as it travels — the shape light
+     actually makes coming through an opening. */
+  clip-path: polygon(26% 0%, 74% 0%, 97% 100%, 3% 100%);
+  /* Fades out well before the end so the beam dissolves instead of
+     stopping at an edge. */
+  background: linear-gradient(
+    to bottom,
+    rgb(255 250 232 / 0.4),
+    rgb(255 249 228 / 0.2) 30%,
+    rgb(255 248 226 / 0.07) 62%,
+    rgb(255 246 220 / 0) 88%
+  );
+
+  /* Adds light rather than laying grey over what it crosses. */
+  mix-blend-mode: screen;
+
+  opacity: 0;
+  /* Matches the curtain, so the light arrives with the drapes. */
+  transition: opacity 1200ms ease-out;
+  pointer-events: none;
+}
+
+.wall-window[data-open] .wall-window__ray {
+  opacity: 1;
+}
+
+/* Daylight reaches the glass too, so it stops reading as night outside. */
+.wall-window[data-open] .wall-window__pane {
+  background: #cfd8e8;
+}
+
+.wall-window[data-open] .wall-window__pane:last-child {
+  background: #e6ecf6;
+}
+
+.wall-window__pane {
+  transition: background 1200ms ease-out;
+}
+
+/* Two sheets of glass rather than one: the outer pane catches a little
+   more of whatever is out there, which is what makes the pair read as a
+   sliding window instead of a single hole in the wall. */
+.wall-window__pane {
+  background: #080b17;
+}
+
+.wall-window__pane:last-child {
+  background: color-mix(in srgb, var(--twigo-violet) 14%, #0b1020);
+}
+
+/* Bigger than the window and centred on it, so the closed sheet covers
+   the glass with margin to spare. */
+.wall-window .wall-window__curtain {
+  --sprite-scale: 2;
+
+  /* The sheet is painted a strong blue, which pulls the eye straight to
+     the corners of a room whose palette is violet and lime. Draining the
+     colour and dropping the level leaves the folds and the shading
+     intact but sits it back in the dark. */
+  filter: grayscale(1) brightness(0.62);
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
