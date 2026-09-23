@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "spotify:auth": "node scripts/spotify-auth.mjs"
+    "spotify:auth": "node scripts/spotify-auth.mjs",
+    "artists": "node scripts/resolve-artists.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

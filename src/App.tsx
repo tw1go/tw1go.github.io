@@ -13,6 +13,7 @@ import {
 } from './features/dialog/lines'
 import { MusicNotes } from './features/spotify/MusicNotes'
 import { NowPlaying } from './features/spotify/NowPlaying'
+import { ArtistShowcase } from './features/showcase/ArtistShowcase'
 import { useNowPlaying } from './features/spotify/useNowPlaying'
 import { useCharacterAnimation } from './hooks/useCharacterAnimation'
 import { playDuration } from './sprites/manifest'
@@ -69,6 +70,11 @@ function App() {
     })
   }, [talks])
   const closeElli = useCallback(() => setElliSays(null), [])
+
+  // The jukebox's record rack.
+  const [showcase, setShowcase] = useState(false)
+  const openShowcase = useCallback(() => setShowcase(true), [])
+  const closeShowcase = useCallback(() => setShowcase(false), [])
 
   // Lulu's counters are refs rather than state: the streak has to be read
   // and written inside a single handler, and a setState would not have
@@ -159,11 +165,17 @@ function App() {
           layer carries the state. */}
       <div
         className="scene__props"
-        aria-hidden="true"
         data-playing={nowPlaying.status === 'playing' || undefined}
       >
         <Sprite name="props/ring-light" className="scene__ring-light" />
-        <Sprite name="props/music-box" className="scene__music-box" />
+        <button
+          type="button"
+          className="scene__jukebox"
+          onClick={openShowcase}
+          aria-label="Show the artists twigo listens to"
+        >
+          <Sprite name="props/music-box" className="scene__music-box" />
+        </button>
       </div>
 
       {/* Elli sits on the desk in her own layer, for the same reason as
@@ -192,6 +204,8 @@ function App() {
       </p>
 
       <NowPlaying state={nowPlaying} />
+
+      {showcase && <ArtistShowcase onClose={closeShowcase} />}
 
       {elliSays && (
         <InteractionBox

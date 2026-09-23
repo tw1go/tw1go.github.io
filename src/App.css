@@ -204,7 +204,10 @@
    against the wall rather than out in the room. */
 .scene__props .scene__music-box {
   --sprite-scale: calc(var(--scene-scale) * 0.4);
+  display: block;
+}
 
+.scene__props .scene__jukebox {
   position: absolute;
   left: 7%;
   /* Row 174 — the character's own ground line. Any higher and its feet
@@ -221,6 +224,19 @@
   /* The cream cabinet is the brightest thing in an unlit room and pulled
      the eye straight off the character. */
   filter: brightness(0.8);
+
+  /* Its layer is pointer-events: none so the room stays click-through. */
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scene__props .scene__jukebox:focus-visible {
+  outline: var(--px) solid var(--color-highlight);
+  outline-offset: var(--px);
 }
 
 /* Working, while something is playing: a short rock on its feet and the
@@ -231,7 +247,7 @@
    would snap it upright and off to one side on the first frame. The bob
    is applied before the rotate so it travels straight up the screen
    rather than along the tilted axis. */
-.scene__props[data-playing] .scene__music-box {
+.scene__props[data-playing] .scene__jukebox {
   animation: jukebox-playing 560ms steps(3, jump-none) infinite alternate;
 }
 
@@ -249,7 +265,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scene__props[data-playing] .scene__music-box {
+  .scene__props[data-playing] .scene__jukebox {
     animation: none;
   }
 }
