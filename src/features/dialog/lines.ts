@@ -120,3 +120,35 @@ export function pickLine(key: string): string | undefined {
   if (!lines?.length) return undefined
   return lines[Math.floor(Math.random() * lines.length)]
 }
+
+/** Who speaks when Fairy Cha is caught. */
+export const FAIRY_SPEAKER = 'Fairy Cha'
+
+const FAIRY_OPENER =
+  "Oh! You caught me. Only the luckiest people ever get to see Fairy Cha — so count yourself one of them. I'm twigo's lover, by the way, and he'll be so jealous I stopped for you. So here, a blessing:"
+
+/**
+ * The pumpkin's curses turned inside out, one for one. Kept just as small
+ * and specific — a blessing you can actually picture coming true lands
+ * better than a grand one.
+ */
+const FAIRY_BLESSINGS = [
+  'May every USB you plug in go in the right way round. First try. Every time.',
+  'May every notification you hear be good news — and actually be yours.',
+  'May your headphone cable never catch on a single door handle again.',
+  'May every chair you sit in already be set to exactly the right height.',
+  'May the word you are reaching for arrive the very moment you need it.',
+  'May every queue you join suddenly turn into the fast one.',
+  'May your phone sit at a hundred percent exactly when it matters most.',
+  'May everyone waving in your direction really be waving at you.',
+  'May every pen you pick up write like it came out of the box today.',
+  'May both of your socks stay perfectly, reliably dry. Forever.',
+  'May every bag of crisps open cleanly along the top. Every bag.',
+  "May you always reach the top of the stairs remembering why you went up.",
+]
+
+export function pickFairyBlessing(): string {
+  const blessing =
+    FAIRY_BLESSINGS[Math.floor(Math.random() * FAIRY_BLESSINGS.length)]
+  return `${FAIRY_OPENER} ${blessing}`
+}

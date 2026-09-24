@@ -1,0 +1,82 @@
+/* Fills a layer that mirrors the sprite frame, so positions below are
+   fractions of the character, not of the viewport — the hearts stay on
+   his head at every scale. */
+.love-hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.love-hearts__heart {
+  position: absolute;
+  left: var(--h-x);
+  /* On the crown of his head: the art's top row is 87 of 256 (34%), and
+     the heart is about 3.5% of the frame tall. */
+  top: 30%;
+  /* Nine art pixels wide at the room's own pixel size, so the hearts sit
+     on the same grid as twigo. */
+  width: calc(var(--scene-pixel) * 9);
+  aspect-ratio: 9 / 8;
+  background: var(--heart-src) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  animation-name: heart-rise;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes heart-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(calc(var(--h-scale) * 0.4));
+  }
+  /* Pops in with a heartbeat — big, back, a little big — before it
+     drifts off. The sideways travel runs on its own curve through the
+     stops, so each heart leaves his head on a gentle arc, not a line. */
+  10% {
+    opacity: 1;
+    transform: translate(
+        calc(-50% + var(--frame) * var(--h-drift) * 0.12),
+        calc(var(--frame) * -0.012)
+      )
+      scale(calc(var(--h-scale) * 1.25));
+  }
+  18% {
+    transform: translate(
+        calc(-50% + var(--frame) * var(--h-drift) * 0.24),
+        calc(var(--frame) * -0.02)
+      )
+      scale(calc(var(--h-scale) * 0.92));
+  }
+  26% {
+    transform: translate(
+        calc(-50% + var(--frame) * var(--h-drift) * 0.36),
+        calc(var(--frame) * -0.026)
+      )
+      scale(calc(var(--h-scale) * 1.08));
+  }
+  34% {
+    transform: translate(
+        calc(-50% + var(--frame) * var(--h-drift) * 0.48),
+        calc(var(--frame) * -0.032)
+      )
+      scale(var(--h-scale));
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--frame) * var(--h-drift)),
+        calc(var(--frame) * -0.1)
+      )
+      scale(var(--h-scale));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-hearts {
+    display: none;
+  }
+}

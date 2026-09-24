@@ -305,6 +305,19 @@
   pointer-events: none;
 }
 
+/* twigo's hearts after Fairy Cha flies over. Above the notes, below the
+   dialog, so a bubble is never hidden behind one. Same box as the stage. */
+.scene__hearts {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+}
+
 /* Dialog sits above everything else in the room. It mirrors the stage's
    box so a bubble can still be placed as a fraction of the sprite frame,
    but as a sibling it is free of the stage's stacking context. */

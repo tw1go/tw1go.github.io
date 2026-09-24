@@ -2,6 +2,7 @@ import curtainBlownSheet from '../assets/sprites/curtain/animation-window-blown.
 import curtainOpenSheet from '../assets/sprites/curtain/animation-curtain-open.png'
 import curtainClosedSheet from '../assets/sprites/curtain/curtain.png'
 import elliIdleSheet from '../assets/sprites/elli/animation-idle-desk.png'
+import fairyChaSheet from '../assets/sprites/fairy-cha.png'
 import airconSheet from '../assets/sprites/aircon.png'
 import pumpkinSheet from '../assets/sprites/golden-pumpkin.png'
 import musicBoxSheet from '../assets/sprites/music-box.png'
@@ -315,6 +316,40 @@ export const sprites = {
     reverse: true,
     iterations: 1,
     label: 'Curtain drawn shut',
+  },
+  /* Fairy Cha: a 4x4 grid of 128px cells, all 16 used. The sheet is two
+     poses in one loop — frames 4-13 are level flight, one full wing-beat
+     from wings-down to wings-down, and 14-15 and 0-3 swing her upright
+     into a hover and back. So it is registered twice.
+
+     Her head drifts forward across the cycle and snaps back on the wrap,
+     so wherever she is drawn she sits inside a `.fairy-steady` wrapper,
+     which cancels that drift frame by frame. Its keyframes are measured
+     off this sheet, one set per registration, and must share these
+     durations. Both run at 100ms a frame. */
+  'fairy/cha': {
+    src: fairyChaSheet,
+    frameWidth: 128,
+    frameHeight: 128,
+    columns: 4,
+    rows: 4,
+    frames: 16,
+    duration: 1600,
+    label: 'Fairy Cha, hovering',
+  },
+  /* Level flight only, for crossing the room. Frame 13 and frame 4 both
+     have her wings down, so the loop closes on the beat instead of
+     cutting back to the hover. */
+  'fairy/cha-flight': {
+    src: fairyChaSheet,
+    frameWidth: 128,
+    frameHeight: 128,
+    columns: 4,
+    rows: 4,
+    frames: 10,
+    firstFrame: 4,
+    duration: 1000,
+    label: 'Fairy Cha, flying',
   },
   /* Room furniture. Single frames, all of them. */
   'props/pumpkin': {

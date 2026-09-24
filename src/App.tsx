@@ -15,6 +15,9 @@ import { MusicNotes } from './features/spotify/MusicNotes'
 import { NowPlaying } from './features/spotify/NowPlaying'
 import { ArtistShowcase } from './features/showcase/ArtistShowcase'
 import { PumpkinReveal } from './features/pumpkin/PumpkinReveal'
+import { FairyCha } from './features/fairy/FairyCha'
+import { FairyReveal } from './features/fairy/FairyReveal'
+import { LoveHearts } from './features/fairy/LoveHearts'
 import { useNowPlaying } from './features/spotify/useNowPlaying'
 import { useCharacterAnimation } from './hooks/useCharacterAnimation'
 import { playDuration } from './sprites/manifest'
@@ -80,6 +83,17 @@ function App() {
   const [showcase, setShowcase] = useState(false)
   const openShowcase = useCallback(() => setShowcase(true), [])
   const closeShowcase = useCallback(() => setShowcase(false), [])
+
+  // Fairy Cha. She flies relative to the character, so she is handed the
+  // stage to measure. The hearts are keyed by a count so a second pass
+  // over him restarts them rather than being swallowed by the first.
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [fairy, setFairy] = useState(false)
+  const [smitten, setSmitten] = useState(0)
+  const caughtFairy = useCallback(() => setFairy(true), [])
+  const closeFairy = useCallback(() => setFairy(false), [])
+  const fairyPassed = useCallback(() => setSmitten((count) => count + 1), [])
+  const heartsDone = useCallback(() => setSmitten(0), [])
 
   // Lulu's counters are refs rather than state: the streak has to be read
   // and written inside a single handler, and a setState would not have
@@ -155,7 +169,7 @@ function App() {
       <div className="scene__glow" aria-hidden="true" />
       <div className="scene__floor" aria-hidden="true" />
 
-      <div className="scene__stage">
+      <div className="scene__stage" ref={stageRef}>
         {/* `key` remounts on every switch so the CSS animation restarts
             from frame 0 instead of retiming mid-cycle. */}
         <Sprite
@@ -211,6 +225,14 @@ function App() {
         <Lulu onPet={talkAboutLulu} />
       </div>
 
+      {/* Over his head, below the dialog, in the same frame-shaped box as
+          the notes so they sit on him at every scale. */}
+      {smitten > 0 && (
+        <div className="scene__hearts">
+          <LoveHearts key={smitten} onDone={heartsDone} />
+        </div>
+      )}
+
       {/* Its own layer for the same reason as the dialog: inside the stage
           the notes would be trapped in that stacking context. */}
       {nowPlaying.status === 'playing' && (
@@ -228,6 +250,14 @@ function App() {
       {showcase && <ArtistShowcase onClose={closeShowcase} />}
 
       {pumpkin && <PumpkinReveal onClose={closePumpkin} />}
+
+      <FairyCha
+        anchor={stageRef}
+        resting={fairy || pumpkin || showcase}
+        onPass={fairyPassed}
+        onCaught={caughtFairy}
+      />
+      {fairy && <FairyReveal onClose={closeFairy} />}
 
       {elliSays && (
         <InteractionBox

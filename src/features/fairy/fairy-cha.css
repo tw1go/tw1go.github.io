@@ -1,0 +1,117 @@
+/* ============================================================
+   Fairy Cha
+   ------------------------------------------------------------
+   Her flight layer covers the viewport: she crosses the whole
+   screen, not just the character's frame. Above the room's
+   dialog (10), below the interaction box (12) and overlays.
+   ============================================================ */
+
+.fairy-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Sized in JS to a whole number of grid cells, then stretched so each
+   cell is one art pixel. */
+.fairy-layer__dust {
+  position: absolute;
+  top: 0;
+  left: 0;
+  image-rendering: pixelated;
+}
+
+.fairy {
+  /* Smaller than the room's 128px furniture: she is meant to be tiny. */
+  --fairy-scale: calc(var(--scene-scale) * 0.3);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  /* Her middle, so the tilt pivots her rather than swinging her round a
+     corner of the cell. */
+  transform-origin: 55% 50%;
+}
+
+.fairy .fairy__art,
+.fairy-reveal .fairy-reveal__art {
+  --sprite-scale: var(--fairy-scale);
+}
+
+/* Her body only — the cell is mostly empty air and swirl, and a click on
+   the air around her should not count as catching her. */
+.fairy__catch {
+  position: absolute;
+  inset: 12% 10% 14% 22%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.fairy__catch:focus-visible {
+  outline: 2px dashed var(--twigo-magenta);
+  outline-offset: 2px;
+}
+
+/* ── The steadying offset ─────────────────────────────────────
+   One stop per frame, in art pixels, measured from the centroid of
+   her hair in each cell and rounded to whole pixels so she stays on
+   the grid. Held with steps(1) so each offset lands on exactly the
+   frame it belongs to. Each set is centred on its own frames' mean,
+   so the art is not pushed off to one side. Re-measure if the sheet
+   changes. */
+.fairy-steady {
+  --fp: calc(var(--fairy-scale) * 1px);
+  animation: fairy-steady-hover var(--fairy-cycle, 1600ms) steps(1, jump-end) infinite;
+}
+
+.fairy-steady--flight {
+  animation-name: fairy-steady-flight;
+}
+
+/* Frames 4-13 only. */
+@keyframes fairy-steady-flight {
+  0% { transform: translate(calc(var(--fp) * 4), calc(var(--fp) * 4)); }
+  10% { transform: translate(calc(var(--fp) * 3), calc(var(--fp) * 4)); }
+  20% { transform: translate(calc(var(--fp) * 2), calc(var(--fp) * 3)); }
+  30% { transform: translate(0, calc(var(--fp) * 1)); }
+  40% { transform: translate(0, 0); }
+  50% { transform: translate(calc(var(--fp) * -1), calc(var(--fp) * -1)); }
+  60% { transform: translate(calc(var(--fp) * -2), calc(var(--fp) * -2)); }
+  70% { transform: translate(calc(var(--fp) * -2), calc(var(--fp) * -3)); }
+  80% { transform: translate(calc(var(--fp) * -2), calc(var(--fp) * -4)); }
+  90%,
+  100% { transform: translate(calc(var(--fp) * -1), calc(var(--fp) * -3)); }
+}
+
+/* The whole sheet, frames 0-15. */
+@keyframes fairy-steady-hover {
+  0% { transform: translate(calc(var(--fp) * 9), calc(var(--fp) * 3)); }
+  6.25% { transform: translate(calc(var(--fp) * 7), calc(var(--fp) * 5)); }
+  12.5% { transform: translate(calc(var(--fp) * 6), calc(var(--fp) * 5)); }
+  18.75% { transform: translate(calc(var(--fp) * 4), calc(var(--fp) * 5)); }
+  25% { transform: translate(calc(var(--fp) * 1), calc(var(--fp) * 3)); }
+  31.25% { transform: translate(0, calc(var(--fp) * 3)); }
+  37.5% { transform: translate(calc(var(--fp) * -2), calc(var(--fp) * 2)); }
+  43.75% { transform: translate(calc(var(--fp) * -3), 0); }
+  50% { transform: translate(calc(var(--fp) * -4), calc(var(--fp) * -2)); }
+  56.25% { transform: translate(calc(var(--fp) * -5), calc(var(--fp) * -3)); }
+  62.5% { transform: translate(calc(var(--fp) * -5), calc(var(--fp) * -3)); }
+  68.75% { transform: translate(calc(var(--fp) * -6), calc(var(--fp) * -4)); }
+  75% { transform: translate(calc(var(--fp) * -5), calc(var(--fp) * -5)); }
+  81.25% { transform: translate(calc(var(--fp) * -5), calc(var(--fp) * -4)); }
+  87.5% { transform: translate(calc(var(--fp) * -4), calc(var(--fp) * -3)); }
+  93.75%,
+  100% { transform: translate(calc(var(--fp) * -1), calc(var(--fp) * -1)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fairy-steady {
+    animation: none;
+  }
+}
