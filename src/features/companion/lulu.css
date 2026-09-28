@@ -21,14 +21,54 @@
     left var(--lulu-move) linear,
     bottom var(--lulu-move) linear;
 
-  /* Her layer is pointer-events: none so the room stays click-through;
-     she opts back in. */
-  pointer-events: auto;
+  /* Her layer is pointer-events: none so the room stays click-through.
+     She stays out of it too: the sprite cell is mostly empty air —
+     asleep, she fills only its bottom two-fifths — so the clickable area
+     is the ::after box below, fitted to her art, not the whole cell. */
+  pointer-events: none;
   cursor: pointer;
   padding: 0;
   border: 0;
   background: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Her hit area, as a share of the sprite cell, from the opaque bounds
+   measured off each sheet (union of every frame). Inside the button, so
+   her facing flip mirrors it with her. The 64px sheets — standing,
+   walking, sitting, grooming — share one box. */
+.lulu::after {
+  content: '';
+  position: absolute;
+  left: 4.7%;
+  top: 9.4%;
+  width: 87.5%;
+  height: 73.4%;
+  pointer-events: auto;
+}
+
+/* The 80px sheets have far more empty cell round her. */
+.lulu[data-action='jump']::after {
+  left: 12.5%;
+  top: 16.3%;
+  width: 73.8%;
+  height: 68.8%;
+}
+
+/* Lying down and getting back up. */
+.lulu:is([data-action='sleep'], [data-action='wake'])::after {
+  left: 16.3%;
+  top: 27.5%;
+  width: 66.3%;
+  height: 57.5%;
+}
+
+/* Curled up asleep: long and low. */
+.lulu[data-action='sleeping']::after {
+  left: 12.5%;
+  top: 42.5%;
+  width: 75%;
+  height: 42.5%;
 }
 
 .lulu:focus-visible {
