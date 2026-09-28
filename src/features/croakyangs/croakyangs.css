@@ -1,0 +1,80 @@
+/* Croakyangs on the right-hand window's sill. Uses the window's hidden-
+   thing slot (.wall-window__secret) for its show-once-the-drapes-are-
+   back behaviour, at the wall's pixel scale. */
+.wall-window__secret.croakyangs {
+  --croak-px: calc(var(--scene-scale) * 0.4px);
+
+  /* Off to one side, in the right-hand pane rather than dead centre on
+     the sash bar. */
+  left: 66%;
+  /* Sat on the inner edge of the frame's bottom rail, which is its 2px
+     border plus 1px padding in room pixels. */
+  bottom: calc(var(--scene-pixel) * 3);
+  /* Sat down behind the sill: his body runs from row 4 to row 29 of the
+     cell, and cropping at row 27 hides the bottom tenth of it — his feet
+     and the base of his belly — below the rail. Cropped rather than
+     layered behind the frame, because behind the frame he would be
+     behind the glass as well. */
+  height: calc(var(--croak-px) * 27);
+  overflow: hidden;
+}
+
+.wall-window__secret.croakyangs .sprite {
+  --sprite-scale: calc(var(--scene-scale) * 0.4);
+}
+
+/* ── The notes over the curtain ────────────────────────────── */
+
+.croak-notes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  /* Fades rather than cutting out, so the last notes of a song drift off
+     instead of vanishing mid-air. */
+  transition: opacity 900ms ease-out;
+}
+
+.croak-notes[data-singing] {
+  opacity: 1;
+  transition-duration: 300ms;
+}
+
+.croak-notes__note {
+  --np: calc(var(--scene-scale) * 0.6px);
+
+  position: absolute;
+  left: calc(var(--n-x) * 100%);
+  /* From the top of the drapes' valance, which sits a little above the
+     window itself. */
+  top: -6%;
+  width: calc(var(--np) * 5);
+  aspect-ratio: 5 / 7;
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  animation: croak-note 2.8s ease-out infinite;
+}
+
+@keyframes croak-note {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  15% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(calc(var(--n-drift) * var(--np) * 4), calc(var(--np) * -14));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--n-drift) * var(--np) * -2), calc(var(--np) * -30));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .croak-notes {
+    display: none;
+  }
+}

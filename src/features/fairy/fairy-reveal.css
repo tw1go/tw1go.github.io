@@ -32,6 +32,15 @@
   animation: fairy-backdrop 300ms ease-out both;
 }
 
+@keyframes fairy-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes fairy-backdrop {
   from {
     opacity: 0;
@@ -153,15 +162,20 @@
     var(--px-3) var(--px-3) 0 0 rgb(0 0 0 / 0.55);
 }
 
+/* Its own keyframes, not the entrance played in reverse. Swapping only
+   the direction on an animation that has already finished does not
+   restart it: it stays at its end time, which reversed is the *start*,
+   so the overlay dropped straight to invisible and took everything in it
+   along — no exit at all. */
+.fairy-reveal[data-closing] {
+  animation: fairy-backdrop-out 500ms ease-in forwards;
+  pointer-events: none;
+}
+
 /* Off to the right and up and away — she leaves the way she came, not
    the way she arrived, which reads as her carrying on her journey.
    Separate keyframes rather than the swoop reversed: reusing a
    finished animation-name snaps straight to its far end. */
-.fairy-reveal[data-closing] {
-  animation: fairy-backdrop 500ms ease-in reverse forwards;
-  pointer-events: none;
-}
-
 .fairy-reveal[data-closing] .fairy-reveal__swoop {
   animation: fairy-swoop-out 500ms cubic-bezier(0.5, 0, 0.9, 0.6) forwards;
 }

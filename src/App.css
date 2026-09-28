@@ -66,6 +66,53 @@
   animation: glow-cycle 24s ease-in-out infinite;
 }
 
+/* The vignette, over everything in the room — wall, furniture, Lulu,
+   Wonwuu, Fairy Cha and her dust — so the corners fall away evenly
+   instead of the sprites floating lit on top of the darkness. Above the
+   fairy's layer (11, and this comes later in the tree); below the
+   interaction box and the overlays, which are interface rather than
+   part of the room. Never takes a click. */
+.scene::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  pointer-events: none;
+  /* Centred on the monitors and roughly the size of their glow, so
+     whatever stands outside the lit patch — the jukebox, the curtains,
+     Lulu at the far end of the floor — goes dark with the wall behind
+     it. The old shape was sized for darkening the page background and
+     barely reached the sprites at all: at night the wall is already
+     black, so over it only the sprites show the vignette. */
+  background: radial-gradient(
+    75% 80% at 50% 45%,
+    transparent var(--room-vignette-in),
+    rgb(0 0 0 / var(--room-vignette)) var(--room-vignette-out)
+  );
+}
+
+/* Lightning in the room. A strike outside (features/sky) sets
+   html[data-flash]; with a curtain open some of it reaches in, a little
+   more with both. Shut curtains keep it out. Under the vignette, so the
+   corners stay dark even in the flash. */
+.scene::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: #dfe6ff;
+  opacity: 0;
+}
+
+html[data-flash][data-curtains='1'] .scene::before {
+  opacity: 0.07;
+}
+
+html[data-flash][data-curtains='2'] .scene::before {
+  opacity: 0.13;
+}
+
 /* Anything fixed to the back wall. Shares the sprite frame's box so the
    windows keep their place relative to the room, not the viewport.
 
@@ -183,6 +230,19 @@
 /* Lulu's roaming layer. Above the character so she reads as being in
    front of the desk, below the dialog so nothing covers a speech box. */
 .scene__pets {
+  position: absolute;
+  top: var(--stage-top);
+  left: 50%;
+  width: var(--frame);
+  height: var(--frame);
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Jord's Fork's ritual. Its circle is on the floor in front of the
+   animals, so it sits one above their layer. */
+.scene__ritual {
   position: absolute;
   top: var(--stage-top);
   left: 50%;

@@ -62,6 +62,9 @@
 
   background: var(--win-frame);
   border: calc(var(--scene-pixel) * 2) solid var(--win-frame);
+  /* The sky is laid across the whole opening, so the sash bar between
+     the panes is drawn over it (::after) rather than being the frame's
+     own background showing through the gap. */
 
   box-shadow:
     /* Hard offset, no blur — the same rule the rest of the room follows. */
@@ -99,12 +102,17 @@
   clip-path: polygon(26% 0%, 74% 0%, 97% 100%, 3% 100%);
   /* Fades out well before the end so the beam dissolves instead of
      stopping at an edge. */
+  /* Coloured and weighted by the sky outside (--sky-ray, set from
+     features/sky): white by day, gold at dawn, rose at dusk, faint blue
+     moonlight at night. */
+  --ray: var(--sky-ray, 255 250 232);
+  --ray-a: var(--sky-ray-a, 1);
   background: linear-gradient(
     to bottom,
-    rgb(255 250 232 / 0.4),
-    rgb(255 249 228 / 0.2) 30%,
-    rgb(255 248 226 / 0.07) 62%,
-    rgb(255 246 220 / 0) 88%
+    rgb(var(--ray) / calc(0.4 * var(--ray-a))),
+    rgb(var(--ray) / calc(0.2 * var(--ray-a))) 30%,
+    rgb(var(--ray) / calc(0.07 * var(--ray-a))) 62%,
+    rgb(var(--ray) / 0) 88%
   );
 
   /* Adds light rather than laying grey over what it crosses. */
@@ -120,28 +128,42 @@
   opacity: 1;
 }
 
-/* Daylight reaches the glass too, so it stops reading as night outside. */
-.wall-window[data-open] .wall-window__pane {
-  background: #cfd8e8;
+/* Lightning through an open window: the beam flares with the strike. */
+html[data-flash] .wall-window[data-open] .wall-window__ray {
+  --ray: 235 240 255;
+  --ray-a: 2.2;
+  transition: none;
 }
 
-.wall-window[data-open] .wall-window__pane:last-child {
-  background: #e6ecf6;
-}
-
+/* The glass. The sky behind it (features/sky) is what you see; the
+   panes only tint it. Two sheets rather than one: the outer pane is a
+   shade darker, which is what makes the pair read as a sliding window
+   instead of a single hole in the wall. */
 .wall-window__pane {
-  transition: background 1200ms ease-out;
-}
-
-/* Two sheets of glass rather than one: the outer pane catches a little
-   more of whatever is out there, which is what makes the pair read as a
-   sliding window instead of a single hole in the wall. */
-.wall-window__pane {
-  background: #080b17;
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.08) 0 18%,
+    transparent 18%
+  );
 }
 
 .wall-window__pane:last-child {
-  background: color-mix(in srgb, var(--twigo-violet) 14%, #0b1020);
+  background: rgb(8 10 24 / 0.16);
+}
+
+/* The sash bar down the middle, over the sky. */
+.wall-window__frame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--scene-pixel);
+  translate: -50% 0;
+  background: var(--win-frame);
+  z-index: 2;
 }
 
 /* Something hidden in the window: behind the drapes, in front of the

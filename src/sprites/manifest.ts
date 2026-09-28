@@ -3,6 +3,17 @@ import curtainOpenSheet from '../assets/sprites/curtain/animation-curtain-open.p
 import curtainClosedSheet from '../assets/sprites/curtain/curtain.png'
 import elliIdleSheet from '../assets/sprites/elli/animation-idle-desk.png'
 import fairyChaSheet from '../assets/sprites/fairy-cha.png'
+import wonwuuSheet from '../assets/sprites/wonwuu/animation-wonwuu-pixel.png'
+import wonwuuStillSheet from '../assets/sprites/wonwuu/static-wonwuu-pixel.png'
+import wonwuuHiSheet from '../assets/sprites/wonwuu/animation-wonwuu.png'
+import jordsForkSheet from '../assets/sprites/jords-fork/animation-jords-fork-pixel.png'
+import jordsForkHiSheet from '../assets/sprites/jords-fork/animation-jords-fork.png'
+import pittukiClimbSheet from '../assets/sprites/pittuki/animation-pittuki-climb-pixel.png'
+import pittukiLookSheet from '../assets/sprites/pittuki/animation-pittuki-movement-pixel.png'
+import pittukiClimbHiSheet from '../assets/sprites/pittuki/animation-pittuki-climb.png'
+import pittukiLookHiSheet from '../assets/sprites/pittuki/animation-pittuki-movement.png'
+import croakSheet from '../assets/sprites/croakyangs/animation-croakyangs-pixel.png'
+import croakHiSheet from '../assets/sprites/croakyangs/animation-croakyangs.png'
 import airconSheet from '../assets/sprites/aircon.png'
 import pumpkinSheet from '../assets/sprites/golden-pumpkin.png'
 import musicBoxSheet from '../assets/sprites/music-box.png'
@@ -350,6 +361,245 @@ export const sprites = {
     firstFrame: 4,
     duration: 1000,
     label: 'Fairy Cha, flying',
+  },
+  /* Wonwuu the rat. The animated sheet is a 12-cell run cycle on a 4x3
+     grid, drawn facing LEFT — the opposite of Lulu. Running and
+     sneaking both play the whole cycle, at very different speeds; the
+     pauses take a short slice of it so he twitches rather than
+     sprinting on the spot.
+
+     These are the -pixel sheets: the originals are drawn on 128px cells,
+     far finer than the room, and shrinking them in CSS left him looking
+     pasted in. They were redrawn on 28px cells by
+     scripts/downsample-sheet.mjs, which puts him on Lulu's pixel grid.
+     Feet land on row 23 in every cell. */
+  'wonwuu/run': {
+    src: wonwuuSheet,
+    frameWidth: 28,
+    frameHeight: 28,
+    columns: 4,
+    rows: 3,
+    frames: 12,
+    duration: 300,
+    label: 'Wonwuu the rat, running',
+  },
+  /* The same full cycle as the run, at under a third of the pace: one
+     careful stride at a time. Wonwuu.tsx derives his travel speed from
+     both durations, so changing either keeps his feet planted. */
+  'wonwuu/sneak': {
+    src: wonwuuSheet,
+    frameWidth: 28,
+    frameHeight: 28,
+    columns: 4,
+    rows: 3,
+    frames: 12,
+    duration: 1100,
+    label: 'Wonwuu the rat, sneaking',
+  },
+  /* Frames 7-9 are three near-identical crouches with the whiskers out,
+     so flicking between them quickly reads as a nervous twitch while he
+     stops to sniff the air. */
+  'wonwuu/twitch': {
+    src: wonwuuSheet,
+    frameWidth: 28,
+    frameHeight: 28,
+    columns: 4,
+    rows: 3,
+    frames: 3,
+    firstFrame: 7,
+    duration: 300,
+    pingPong: true,
+    label: 'Wonwuu the rat, twitching',
+  },
+  /* The original, full-resolution sheet, for his reveal: there he is
+     held up in the middle of the screen like the pumpkin, as a showpiece
+     rather than an animal in the room, so the detail is wanted. 128px
+     cells, same frame layout as the pixel sheet. */
+  'wonwuu/hi-run': {
+    src: wonwuuHiSheet,
+    frameWidth: 128,
+    frameHeight: 128,
+    columns: 4,
+    rows: 3,
+    frames: 12,
+    duration: 300,
+    label: 'Wonwuu the rat, running',
+  },
+  'wonwuu/hi-twitch': {
+    src: wonwuuHiSheet,
+    frameWidth: 128,
+    frameHeight: 128,
+    columns: 4,
+    rows: 3,
+    frames: 3,
+    firstFrame: 7,
+    duration: 300,
+    pingPong: true,
+    label: 'Wonwuu the rat, twitching',
+  },
+  /* Frozen, for looking about and for the moment he is spotted. */
+  'wonwuu/still': {
+    src: wonwuuStillSheet,
+    frameWidth: 28,
+    frameHeight: 28,
+    columns: 1,
+    rows: 1,
+    frames: 1,
+    duration: 0,
+    label: 'Wonwuu the rat, frozen',
+  },
+  /* Jord's Fork: a flaming trident, 10 cells of its fire flickering on a
+     4x3 grid. The -pixel sheet again — the original's 128px cells are as
+     fine as Wonwuu's were — but redrawn to 48px rather than his 28: the
+     tines are one-pixel lines, and any coarser than that the flames
+     outvote them and the fork dissolves into a smudge. */
+  'jords-fork/burn': {
+    src: jordsForkSheet,
+    frameWidth: 48,
+    frameHeight: 48,
+    columns: 4,
+    rows: 3,
+    frames: 10,
+    duration: 900,
+    label: "Jord's Fork, a flaming trident",
+  },
+  /* The original sheet, for its reveal, where it is held up in the middle
+     of the screen as a showpiece and the detail is wanted. */
+  'jords-fork/hi-burn': {
+    src: jordsForkHiSheet,
+    frameWidth: 128,
+    frameHeight: 128,
+    columns: 4,
+    rows: 3,
+    frames: 10,
+    duration: 900,
+    label: "Jord's Fork, a flaming trident",
+  },
+  /* Pittuki, the house lizard. Two sheets, both 4x4 grids with 14 cells
+     used, drawn from above with his head to the upper left: `climb` is
+     his legs stepping, `look` has him stopped, turning his head about.
+     Both end on their first pose, so both loop.
+
+     He lives on the wall, so these are the -pixel sheets halved from
+     64px to 32px cells — a clean factor of two — and drawn at the wall
+     furniture's scale rather than the animals'. */
+  'pittuki/climb': {
+    src: pittukiClimbSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 4,
+    frames: 14,
+    duration: 700,
+    label: 'Pittuki the house lizard, climbing',
+  },
+  'pittuki/look': {
+    src: pittukiLookSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 4,
+    frames: 14,
+    duration: 1500,
+    iterations: 1,
+    label: 'Pittuki the house lizard, looking around',
+  },
+  /* The look sheet's first cell, held: frozen flat to the wall. */
+  'pittuki/still': {
+    src: pittukiLookSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 4,
+    frames: 1,
+    duration: 0,
+    label: 'Pittuki the house lizard, frozen',
+  },
+  /* Full resolution, for his reveal. */
+  'pittuki/hi-climb': {
+    src: pittukiClimbHiSheet,
+    frameWidth: 64,
+    frameHeight: 64,
+    columns: 4,
+    rows: 4,
+    frames: 14,
+    duration: 700,
+    label: 'Pittuki the house lizard, climbing',
+  },
+  'pittuki/hi-look': {
+    src: pittukiLookHiSheet,
+    frameWidth: 64,
+    frameHeight: 64,
+    columns: 4,
+    rows: 4,
+    frames: 14,
+    duration: 1500,
+    label: 'Pittuki the house lizard, looking around',
+  },
+  /* Croakyangs, the singing frog. One 12-cell sheet on a 4x3 grid,
+     facing left, in three parts: 0-2 draw breath and open up, 3-8 are
+     the song itself — eyes shut, notes coming off him — and 9-11 settle
+     him back. Only the middle part loops.
+
+     He sits in the right-hand window, so the room uses a -pixel sheet
+     halved to 32px cells at the wall's scale, like Pittuki. */
+  'croakyangs/still': {
+    src: croakSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 3,
+    frames: 1,
+    firstFrame: 0,
+    duration: 0,
+    label: 'Croakyangs the frog, sitting quietly',
+  },
+  'croakyangs/start': {
+    src: croakSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 3,
+    frames: 3,
+    firstFrame: 0,
+    duration: 330,
+    iterations: 1,
+    label: 'Croakyangs the frog, drawing breath',
+  },
+  'croakyangs/sing': {
+    src: croakSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 3,
+    frames: 6,
+    firstFrame: 3,
+    duration: 900,
+    label: 'Croakyangs the frog, singing',
+  },
+  'croakyangs/stop': {
+    src: croakSheet,
+    frameWidth: 32,
+    frameHeight: 32,
+    columns: 4,
+    rows: 3,
+    frames: 3,
+    firstFrame: 9,
+    duration: 330,
+    iterations: 1,
+    label: 'Croakyangs the frog, finishing his song',
+  },
+  /* Full resolution, for his reveal. */
+  'croakyangs/hi-sing': {
+    src: croakHiSheet,
+    frameWidth: 64,
+    frameHeight: 64,
+    columns: 4,
+    rows: 3,
+    frames: 6,
+    firstFrame: 3,
+    duration: 900,
+    label: 'Croakyangs the frog, singing',
   },
   /* Room furniture. Single frames, all of them. */
   'props/pumpkin': {

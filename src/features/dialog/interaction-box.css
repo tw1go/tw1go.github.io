@@ -171,6 +171,26 @@
   }
 }
 
+/* The reveals' boxes are plain panels inside an overlay that carries the
+   closing flag, so they follow their parent's rather than their own.
+   They sit in the overlay's normal flow with no centring offset, so they
+   get keyframes without the -50%: borrowing interaction-out jolted each
+   one left by half its width before it faded. */
+[data-closing] > .interaction--static {
+  animation: interaction-drop 260ms ease-in forwards;
+}
+
+@keyframes interaction-drop {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(var(--px-12));
+  }
+}
+
 @keyframes interaction-out {
   0% {
     opacity: 1;

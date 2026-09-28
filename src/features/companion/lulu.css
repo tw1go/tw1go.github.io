@@ -42,6 +42,13 @@
   --sprite-scale: var(--lulu-scale);
 }
 
+/* Over her head when she spots Wonwuu. In the sheet's own right-facing
+   coordinates; her flip carries it round when she faces left. */
+.lulu__alert {
+  left: 74%;
+  bottom: 76%;
+}
+
 /* Jumping up decelerates into the landing; dropping down accelerates.
    Same curve either way would read as floating. */
 .lulu[data-jump='desk'] {

@@ -32,6 +32,13 @@ interface WallWindowProps {
    * it is shut.
    */
   children?: React.ReactNode
+  /**
+   * Anything to lay over the drapes instead — seen whether the curtain is
+   * open or shut.
+   */
+  overlay?: React.ReactNode
+  /** What is outside: drawn behind the glass, inside the frame. */
+  sky?: React.ReactNode
 }
 
 /**
@@ -45,7 +52,7 @@ interface WallWindowProps {
  * the shut sheet covers the glass completely — the open animation only
  * draws the drapes aside, and anything wider would still be showing.
  */
-export function WallWindow({ side, toggles, onToggle, children }: WallWindowProps) {
+export function WallWindow({ side, toggles, onToggle, children, overlay, sky }: WallWindowProps) {
   const open = toggles % 2 === 1
   const [phase, setPhase] = useState<Phase>('shut')
   const [latched, setLatched] = useState(toggles)
@@ -117,6 +124,7 @@ export function WallWindow({ side, toggles, onToggle, children }: WallWindowProp
         <span className="wall-window__ray" aria-hidden="true" />
 
         <span className="wall-window__frame">
+          {sky}
           <span className="wall-window__pane" />
           <span className="wall-window__pane" />
         </span>
@@ -132,6 +140,8 @@ export function WallWindow({ side, toggles, onToggle, children }: WallWindowProp
         className="wall-window__curtain"
         iterations={phase === 'shut' || phase === 'opened' ? 'infinite' : 1}
       />
+
+      {overlay}
     </div>
   )
 }

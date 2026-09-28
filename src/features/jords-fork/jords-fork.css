@@ -1,0 +1,492 @@
+/* ============================================================
+   Jord's Fork
+   ------------------------------------------------------------
+   A summoning circle on the floor at the right of the room, and
+   the flaming trident it brings up. Everything is positioned off
+   one zero-sized anchor at the circle's centre, and measured in
+   art pixels (--jp) on Lulu's grid, so it keeps its shape and its
+   place in the room at every breakpoint.
+   ============================================================ */
+
+.jords-fork {
+  --jp: calc(var(--scene-scale) * 0.6px);
+
+  position: absolute;
+  left: 88%;
+  /* Floor row 188 of the 256px frame: in front of the desk legs, the
+     character's feet (174) and the animals (176-178). */
+  bottom: calc((256 - 188) / 256 * 100%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ── The circle ────────────────────────────────────────────── */
+
+.jords-fork__circle {
+  position: absolute;
+  left: calc(var(--jp) * -30.5);
+  top: calc(var(--jp) * -9.5);
+  width: calc(var(--jp) * 61);
+  height: calc(var(--jp) * 19);
+  overflow: visible;
+  /* The glow follows the glyphs, like the sign's: drop-shadows take the
+     shape of what they are cast from, where a gradient behind would
+     read as a round patch of light. A tight hot edge, then a wide
+     spill. */
+  filter:
+    drop-shadow(0 0 var(--jp) #ffb066)
+    drop-shadow(0 0 calc(var(--jp) * 3) rgb(255 110 36 / 0.95))
+    drop-shadow(0 0 calc(var(--jp) * 8) rgb(255 70 20 / 0.7));
+}
+
+.jords-fork__circle .ritual-part--ring {
+  fill: #ff9442;
+}
+
+.jords-fork__circle .ritual-part--star {
+  fill: #ff5a36;
+}
+
+.jords-fork__circle .ritual-part--rune {
+  fill: #fff1c4;
+}
+
+/* Each part flickers alight on its turn — stepped, so it catches like a
+   struck match rather than fading up — and then holds. Declared once
+   for every phase until the fade, so moving on to the next phase never
+   restarts it. */
+.jords-fork__circle .ritual-part {
+  opacity: 0;
+  animation: fork-part-kindle 520ms steps(1, jump-end)
+    calc(var(--order) * var(--kindle-step)) both;
+}
+
+@keyframes fork-part-kindle {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  40% {
+    opacity: 0.25;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Going out in reverse order: the star first, the outer ring last. Its
+   own keyframes, not the kindle reversed — a finished animation does not
+   restart when only its direction changes. */
+.jords-fork[data-phase='fade'] .jords-fork__circle .ritual-part {
+  animation: fork-part-out 420ms steps(1, jump-end)
+    calc(var(--reverse) * var(--fade-step)) both;
+}
+
+@keyframes fork-part-out {
+  0% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.35;
+  }
+  55% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Breathing while the fork is out, as though the circle is holding it
+   up. */
+.jords-fork[data-phase='hover'] .jords-fork__circle {
+  animation: fork-circle-pulse 1.7s ease-in-out infinite;
+}
+
+@keyframes fork-circle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+/* Light thrown on the boards round the circle. */
+.jords-fork__pool {
+  position: absolute;
+  left: calc(var(--jp) * -60);
+  top: calc(var(--jp) * -22);
+  width: calc(var(--jp) * 120);
+  height: calc(var(--jp) * 44);
+  background: radial-gradient(closest-side, rgb(255 110 40 / 0.46), transparent);
+  animation: fork-pool-in 2s ease-in both;
+}
+
+@keyframes fork-pool-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.jords-fork[data-phase='fade'] .jords-fork__pool {
+  animation: fork-pool-out 1s ease-out both;
+}
+
+@keyframes fork-pool-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ── The summoning ─────────────────────────────────────────── */
+
+/* A shaft of light up out of the circle as the fork comes through. */
+.jords-fork__pillar {
+  position: absolute;
+  left: calc(var(--jp) * -8);
+  bottom: 0;
+  width: calc(var(--jp) * 16);
+  height: calc(var(--jp) * 84);
+  background: linear-gradient(
+    to top,
+    rgb(255 214 150 / 0.95),
+    rgb(255 120 44 / 0.6) 40%,
+    transparent
+  );
+  transform-origin: 50% 100%;
+  animation: fork-pillar 750ms ease-out forwards;
+}
+
+@keyframes fork-pillar {
+  0% {
+    opacity: 1;
+    transform: scaleY(0) scaleX(0.4);
+  }
+  30% {
+    opacity: 1;
+    transform: scaleY(1) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1) scaleX(0.6);
+  }
+}
+
+/* ── The fork ──────────────────────────────────────────────── */
+
+/* Everything above the circle's centre line and nothing below it: the
+   fork rises from under the floor, so the part still below the line has
+   to be hidden, or it reads as passing in front of the circle. Wide and
+   tall enough to never clip the hovering fork, its bob or its drift. */
+.jords-fork__portal {
+  position: absolute;
+  left: calc(var(--jp) * -40);
+  bottom: 0;
+  width: calc(var(--jp) * 80);
+  height: calc(var(--jp) * 90);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Centred over the circle, hanging a little way above it. */
+.jords-fork__lift {
+  position: absolute;
+  left: calc(var(--jp) * 16);
+  bottom: calc(var(--jp) * 6);
+}
+
+.jords-fork[data-phase='rise'] .jords-fork__lift {
+  animation: fork-rise 750ms cubic-bezier(0.25, 0.8, 0.35, 1) both;
+}
+
+/* Lifted up out of the circle at full size, fading in as it clears the
+   floor — it is being brought up, not grown. */
+@keyframes fork-rise {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--jp) * 26));
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jords-fork[data-phase='sink'] .jords-fork__lift {
+  animation: fork-sink 700ms cubic-bezier(0.6, 0, 0.9, 0.5) forwards;
+}
+
+/* And lowered back in the same way, at full size. */
+@keyframes fork-sink {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--jp) * 26));
+  }
+}
+
+/* The hover, done the way games float an item rather than by turning
+   it: a flat sprite spun on its axis goes edge-on and then shows its
+   mirror image, which gives away that it is paper-thin, and tilting it
+   knocks its pixels off the grid.
+
+   So it bobs in whole art pixels — stepped, one pixel at a time, along
+   a sine — and drifts side to side on a second, slower cycle. The two
+   periods do not divide into each other, so together they trace a loose
+   figure-eight that never quite repeats. Its shadow on the circle
+   (below) runs on the bob's clock, so the fork visibly hangs above it. */
+.jords-fork__bob {
+  animation: fork-bob 3.2s steps(1, jump-end) infinite;
+}
+
+@keyframes fork-bob {
+  0% {
+    transform: translateY(0);
+  }
+  6.25% {
+    transform: translateY(0);
+  }
+  12.5% {
+    transform: translateY(calc(var(--jp) * -1));
+  }
+  18.75% {
+    transform: translateY(calc(var(--jp) * -2));
+  }
+  25% {
+    transform: translateY(calc(var(--jp) * -3));
+  }
+  31.25% {
+    transform: translateY(calc(var(--jp) * -4));
+  }
+  37.5% {
+    transform: translateY(calc(var(--jp) * -5));
+  }
+  43.75% {
+    transform: translateY(calc(var(--jp) * -6));
+  }
+  50% {
+    transform: translateY(calc(var(--jp) * -6));
+  }
+  56.25% {
+    transform: translateY(calc(var(--jp) * -6));
+  }
+  62.5% {
+    transform: translateY(calc(var(--jp) * -5));
+  }
+  68.75% {
+    transform: translateY(calc(var(--jp) * -4));
+  }
+  75% {
+    transform: translateY(calc(var(--jp) * -3));
+  }
+  81.25% {
+    transform: translateY(calc(var(--jp) * -2));
+  }
+  87.5% {
+    transform: translateY(calc(var(--jp) * -1));
+  }
+  93.75% {
+    transform: translateY(0);
+  }
+}
+
+.jords-fork__drift {
+  animation: fork-drift 5.6s steps(1, jump-end) infinite;
+}
+
+@keyframes fork-drift {
+  0% {
+    transform: translateX(0);
+  }
+  12.5% {
+    transform: translateX(calc(var(--jp) * 1));
+  }
+  25% {
+    transform: translateX(calc(var(--jp) * 2));
+  }
+  37.5% {
+    transform: translateX(calc(var(--jp) * 1));
+  }
+  50% {
+    transform: translateX(0);
+  }
+  62.5% {
+    transform: translateX(calc(var(--jp) * -1));
+  }
+  75% {
+    transform: translateX(calc(var(--jp) * -2));
+  }
+  87.5% {
+    transform: translateX(calc(var(--jp) * -1));
+  }
+}
+
+/* A dark patch on the circle under the fork: tightest and faintest when
+   it is highest. Same clock and steps as the bob, and mounted with it,
+   so the two stay in lockstep. */
+.jords-fork__shadow {
+  position: absolute;
+  left: calc(var(--jp) * -9);
+  top: calc(var(--jp) * -2.5);
+  width: calc(var(--jp) * 18);
+  height: calc(var(--jp) * 5);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(20 4 0 / 0.75), transparent);
+  animation: fork-shadow 3.2s steps(1, jump-end) infinite;
+}
+
+@keyframes fork-shadow {
+  0% {
+    opacity: 1.00;
+    transform: scale(1.000);
+  }
+  6.25% {
+    opacity: 1.00;
+    transform: scale(1.000);
+  }
+  12.5% {
+    opacity: 0.91;
+    transform: scale(0.955);
+  }
+  18.75% {
+    opacity: 0.82;
+    transform: scale(0.910);
+  }
+  25% {
+    opacity: 0.73;
+    transform: scale(0.865);
+  }
+  31.25% {
+    opacity: 0.64;
+    transform: scale(0.820);
+  }
+  37.5% {
+    opacity: 0.55;
+    transform: scale(0.775);
+  }
+  43.75% {
+    opacity: 0.46;
+    transform: scale(0.730);
+  }
+  50% {
+    opacity: 0.46;
+    transform: scale(0.730);
+  }
+  56.25% {
+    opacity: 0.46;
+    transform: scale(0.730);
+  }
+  62.5% {
+    opacity: 0.55;
+    transform: scale(0.775);
+  }
+  68.75% {
+    opacity: 0.64;
+    transform: scale(0.820);
+  }
+  75% {
+    opacity: 0.73;
+    transform: scale(0.865);
+  }
+  81.25% {
+    opacity: 0.82;
+    transform: scale(0.910);
+  }
+  87.5% {
+    opacity: 0.91;
+    transform: scale(0.955);
+  }
+  93.75% {
+    opacity: 1.00;
+    transform: scale(1.000);
+  }
+}
+
+/* The layer is click-through; the fork itself opts back in. */
+.jords-fork__catch {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jords-fork__catch:disabled {
+  pointer-events: none;
+}
+
+.jords-fork__catch:focus-visible {
+  outline: var(--px) dashed #ff9442;
+  outline-offset: calc(var(--px) * -4);
+}
+
+.jords-fork .jords-fork__art {
+  display: block;
+  --sprite-scale: calc(var(--scene-scale) * 0.6);
+}
+
+/* Sparks lifting off the circle while the fork is out. */
+.jords-fork__ember {
+  position: absolute;
+  left: calc(var(--e-x) * var(--jp) * 60);
+  bottom: 0;
+  width: var(--jp);
+  height: var(--jp);
+  background: #ffb347;
+  opacity: 0;
+  animation: fork-ember 1.7s ease-out calc(var(--e-i) * 170ms) infinite;
+}
+
+.jords-fork__ember:nth-child(odd) {
+  background: #ff5a1f;
+}
+
+@keyframes fork-ember {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--jp) * 3), calc(var(--jp) * -46));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jords-fork__bob,
+  .jords-fork__drift,
+  .jords-fork__shadow,
+  .jords-fork__ember,
+  .jords-fork__pillar,
+  .jords-fork[data-phase='hover'] .jords-fork__circle {
+    animation: none;
+  }
+}

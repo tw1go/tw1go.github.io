@@ -2,7 +2,9 @@
    not a card. Sized to stay out of the character's way. */
 .now-playing {
   position: absolute;
-  z-index: 1;
+  /* Interface, so above the room's vignette (11) — under it, the strip
+     sat in the darkened bottom edge and its text dimmed with the room. */
+  z-index: 12;
   bottom: var(--px-6);
   left: 50%;
   transform: translateX(-50%);

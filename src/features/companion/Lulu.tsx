@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useRef, useState, type RefObject } from 'react'
 import { Sprite } from '../../components/Sprite'
 import { playDuration, type SpriteName } from '../../sprites/manifest'
+import { Exclaim } from '../wonwuu/Exclaim'
+import { ALERT_MS, liveX, nextTrack, offstage, type Track } from '../wonwuu/track'
 import './lulu.css'
 
 type Surface = 'floor' | 'desk'
@@ -15,6 +17,12 @@ type Action =
   | 'sleep'
   | 'sleeping'
   | 'wake'
+  // Seeing Wonwuu off: freeze under a "!", run him out of the room, stay
+  // out a while, then saunter back in as though nothing happened.
+  | 'alert'
+  | 'chase'
+  | 'away'
+  | 'return'
 
 /**
  * Standing line for each surface, as a row of the 256px character frame.
@@ -52,6 +60,15 @@ const JUMP_MS = 700
 /** How long she pauses between walks, before deciding what to do next. */
 const STAND_MIN_MS = 1400
 const STAND_MAX_MS = 4200
+/** Chasing: a good deal quicker than her stroll, a little slower than
+    the rat's 31, so she never catches him and never overtakes him. */
+const CHASE_SPEED = 26
+/** Her walk sheet sped up to keep her stride at about 13% of the frame
+    — a long trot — at that speed, so her paws stay planted. */
+const CHASE_CYCLE_MS = 500
+/** How long she stays out of the room after a chase. */
+const AWAY_MIN_MS = 5000
+const AWAY_MAX_MS = 9000
 /** How long she stays sat down, flicking her tail. Cats commit to this. */
 const SIT_MIN_MS = 30_000
 const SIT_MAX_MS = 60_000
@@ -67,6 +84,10 @@ const SPRITE: Record<Action, SpriteName> = {
   sleep: 'lulu/sleep',
   sleeping: 'lulu/sleeping',
   wake: 'lulu/wake',
+  alert: 'lulu/stand',
+  chase: 'lulu/walk',
+  away: 'lulu/stand',
+  return: 'lulu/walk',
 }
 
 const LOOPS: Record<Action, number | 'infinite'> = {
@@ -80,6 +101,10 @@ const LOOPS: Record<Action, number | 'infinite'> = {
   sleep: 1,
   sleeping: 'infinite',
   wake: 1,
+  alert: 'infinite',
+  chase: 'infinite',
+  away: 'infinite',
+  return: 'infinite',
 }
 
 /**
@@ -126,8 +151,35 @@ function walkTo(surface: Surface, from: Pose, id: number): Pose {
   }
 }
 
-function nextPose(prev: Pose): Pose {
+function nextPose(prev: Pose, off: { left: number; right: number }): Pose {
   const id = prev.id + 1
+
+  // The chase runs straight through: out the side she is facing, gone,
+  // then back in through the same edge.
+  if (prev.action === 'alert') {
+    const x = prev.facing === 1 ? off.right : off.left
+    return {
+      ...prev,
+      id,
+      action: 'chase',
+      x,
+      moveMs: (Math.abs(x - prev.x) / CHASE_SPEED) * 1000,
+    }
+  }
+  if (prev.action === 'chase') return { ...prev, id, action: 'away', moveMs: 0 }
+  if (prev.action === 'away') {
+    const [min, max] = RANGE.floor
+    // Back in to somewhere on her own side of the room, facing inward.
+    const x = prev.facing === 1 ? max - Math.random() * 30 : min + Math.random() * 30
+    return {
+      id,
+      action: 'return',
+      surface: 'floor',
+      x,
+      facing: prev.facing === 1 ? -1 : 1,
+      moveMs: (Math.abs(x - prev.x) / SPEED) * 1000,
+    }
+  }
 
   // Sleeping and sitting are both three-part sequences — settle, hold,
   // get back up — so those states just advance to the next part.
@@ -140,6 +192,7 @@ function nextPose(prev: Pose): Pose {
   // paces without pause, which reads as a machine rather than an animal.
   if (
     prev.action === 'walk' ||
+    prev.action === 'return' ||
     prev.action === 'jump' ||
     prev.action === 'wake' ||
     prev.action === 'situp' ||
@@ -190,6 +243,13 @@ function holdFor(pose: Pose): number {
       return playDuration('lulu/sleeping') * (3 + Math.floor(Math.random() * 4))
     case 'wake':
       return playDuration('lulu/wake')
+    case 'alert':
+      return ALERT_MS
+    case 'chase':
+    case 'return':
+      return pose.moveMs
+    case 'away':
+      return AWAY_MIN_MS + Math.random() * (AWAY_MAX_MS - AWAY_MIN_MS)
   }
 }
 
@@ -200,7 +260,22 @@ function holdFor(pose: Pose): number {
  * then lies down for a while. Everything is expressed in frame
  * percentages so she keeps her place in the room at every breakpoint.
  */
-export function Lulu({ onPet }: { onPet?: (resting: boolean) => void }) {
+export interface LuluControls {
+  /** She has spotted Wonwuu, and will run him off towards `direction`. */
+  chase: (direction: 1 | -1) => void
+}
+
+interface LuluProps {
+  onPet?: (resting: boolean) => void
+  /** Every move she makes, for Wonwuu to check her line of sight. */
+  onMove?: (track: Track) => void
+  /** Lets the room start a chase. */
+  controls?: RefObject<LuluControls | null>
+  /** She is back in the room after a chase. */
+  onBack?: () => void
+}
+
+export function Lulu({ onPet, onMove, controls, onBack }: LuluProps) {
   const [pose, setPose] = useState<Pose>({
     id: 0,
     action: 'walk',
@@ -210,14 +285,57 @@ export function Lulu({ onPet }: { onPet?: (resting: boolean) => void }) {
     moveMs: 0,
   })
 
+  const ref = useRef<HTMLButtonElement>(null)
+  // Kept here and reported out, so the chase has a position to start
+  // from whether or not anyone is listening.
+  const own = useRef<Track | null>(null)
+
+  const onBackRef = useRef(onBack)
+  const onMoveRef = useRef(onMove)
   useEffect(() => {
+    onBackRef.current = onBack
+    onMoveRef.current = onMove
+  }, [onBack, onMove])
+
+  useEffect(() => {
+    own.current = nextTrack(own.current, {
+      toX: pose.x,
+      ms: pose.moveMs,
+      facing: pose.facing,
+      action: pose.action,
+      surface: pose.surface,
+    })
+    onMoveRef.current?.(own.current)
     if (prefersReducedMotion()) return
-    const timer = window.setTimeout(() => setPose(nextPose), holdFor(pose))
+    const timer = window.setTimeout(() => {
+      // Measured each step rather than once, so a resize mid-chase still
+      // sends her fully off the screen. Wide enough to clear her whole
+      // body, which is about an eighth of the frame.
+      const off = offstage(ref.current?.parentElement ?? null, 14)
+      if (pose.action === 'return') onBackRef.current?.()
+      setPose((prev) => nextPose(prev, off))
+    }, holdFor(pose))
     return () => window.clearTimeout(timer)
   }, [pose])
 
+  const chase = useCallback((direction: 1 | -1) => {
+    // Stopped dead exactly where she is, mid-stride if need be — the
+    // transition is cut by a zero-length move to her current spot.
+    const x = own.current ? liveX(own.current) : undefined
+    setPose((prev) => ({
+      id: prev.id + 1,
+      action: 'alert',
+      surface: 'floor',
+      x: x ?? prev.x,
+      facing: direction,
+      moveMs: 0,
+    }))
+  }, [])
+  useImperativeHandle(controls, () => ({ chase }), [chase])
+
   return (
     <button
+      ref={ref}
       type="button"
       className="lulu"
       onClick={() => onPet?.(RESTING.has(pose.action))}
@@ -240,7 +358,9 @@ export function Lulu({ onPet }: { onPet?: (resting: boolean) => void }) {
         name={SPRITE[pose.action]}
         className="lulu__sprite"
         iterations={LOOPS[pose.action]}
+        duration={pose.action === 'chase' ? CHASE_CYCLE_MS : undefined}
       />
+      {pose.action === 'alert' && <Exclaim className="lulu__alert" />}
     </button>
   )
 }

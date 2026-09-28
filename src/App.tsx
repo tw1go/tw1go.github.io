@@ -2,7 +2,21 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Sprite } from './components/Sprite'
 import { WallWindow } from './components/WallWindow'
 import { Elli } from './features/companion/Elli'
-import { Lulu } from './features/companion/Lulu'
+import { Lulu, type LuluControls } from './features/companion/Lulu'
+import { Wonwuu, type WonwuuControls } from './features/wonwuu/Wonwuu'
+import { Pittuki } from './features/pittuki/Pittuki'
+import { PittukiReveal } from './features/pittuki/PittukiReveal'
+import { Croakyangs } from './features/croakyangs/Croakyangs'
+import { CroakNotes } from './features/croakyangs/CroakNotes'
+import { SerenadeReveal } from './features/croakyangs/SerenadeReveal'
+import { useSinging } from './features/croakyangs/useSinging'
+import { WindowSky } from './features/sky/WindowSky'
+import { rayFor, roomLight, useSky } from './features/sky/sky'
+import { useLightning } from './features/sky/useLightning'
+import { WonwuuReveal } from './features/wonwuu/WonwuuReveal'
+import { JordsFork } from './features/jords-fork/JordsFork'
+import { ForkReveal } from './features/jords-fork/ForkReveal'
+import type { Track } from './features/wonwuu/track'
 import { DialogBubble } from './features/dialog/DialogBubble'
 import { InteractionBox } from './features/dialog/InteractionBox'
 import {
@@ -59,6 +73,43 @@ function App() {
   // while the box is open swaps the line — the id remounts the box and
   // restarts the crawl.
   const [elliSays, setElliSays] = useState<{ id: number; text: string } | null>(null)
+
+  // Wonwuu's reveal, shown when he is clicked. It draws its own trade.
+  const [ratCaughtOpen, setRatCaughtOpen] = useState(false)
+  const ratCaught = useCallback(() => {
+    // His reveal covers the room, so Elli's panel is closed rather than
+    // left waiting underneath it.
+    setElliSays(null)
+    setRatCaughtOpen(true)
+  }, [])
+  const closeRat = useCallback(() => setRatCaughtOpen(false), [])
+
+  // Jord's Fork's prophecy, shown when the fork is clicked.
+  const [forkOpen, setForkOpen] = useState(false)
+  const forkCaught = useCallback(() => {
+    setElliSays(null)
+    setForkOpen(true)
+  }, [])
+  const closeFork = useCallback(() => setForkOpen(false), [])
+
+  // Dr. Pittuki's session, shown when the lizard is clicked.
+  const [lizardOpen, setLizardOpen] = useState(false)
+  const lizardCaught = useCallback(() => {
+    setElliSays(null)
+    setLizardOpen(true)
+  }, [])
+  const closeLizard = useCallback(() => setLizardOpen(false), [])
+
+  // Croakyangs lives in the right-hand window. One song clock for both
+  // the frog behind the drapes and the notes rising over them.
+  const singing = useSinging()
+  const [serenade, setSerenade] = useState(false)
+  const frogFound = useCallback(() => {
+    setElliSays(null)
+    setSerenade(true)
+  }, [])
+  const closeSerenade = useCallback(() => setSerenade(false), [])
+
   // Counts clicks for the life of the page, so it doubles as the remount
   // key and as the test for "has she introduced herself yet". Deriving
   // that from `elliSays` would not work: the box is cleared on close, so
@@ -95,6 +146,31 @@ function App() {
   const fairyPassed = useCallback(() => setSmitten((count) => count + 1), [])
   const heartsDone = useCallback(() => setSmitten(0), [])
 
+  // Wonwuu only ever sees Lulu through her published track, and the
+  // room starts the chase through her controls. While she is off seeing
+  // him out, he stays away.
+  const luluTrack = useRef<Track | null>(null)
+  const luluControls = useRef<LuluControls | null>(null)
+  const [luluOut, setLuluOut] = useState(false)
+  const ratSpotted = useCallback((direction: 1 | -1) => {
+    setLuluOut(true)
+    luluControls.current?.chase(direction)
+  }, [])
+  const luluBack = useCallback(() => setLuluOut(false), [])
+
+  const luluMoved = useCallback((track: Track) => {
+    luluTrack.current = track
+  }, [])
+
+  // Pittuki watches Wonwuu from the wall; when he catches him passing
+  // below, the room sets Wonwuu glaring back.
+  const ratTrack = useRef<Track | null>(null)
+  const ratControls = useRef<WonwuuControls | null>(null)
+  const ratMoved = useCallback((track: Track | null) => {
+    ratTrack.current = track
+  }, [])
+  const lizardGlared = useCallback(() => ratControls.current?.glare(), [])
+
   // Lulu's counters are refs rather than state: the streak has to be read
   // and written inside a single handler, and a setState would not have
   // applied in time to choose the line.
@@ -111,14 +187,28 @@ function App() {
   }, [])
   const openLeft = useCallback(() => toggleCurtain('left'), [toggleCurtain])
   const openRight = useCallback(() => toggleCurtain('right'), [toggleCurtain])
-  // 0 dark, 1 half lit, 2 full daylight.
-  const light = (curtains.left % 2) + (curtains.right % 2)
+  // What is outside: the visitor's time of day and the weather there.
+  const sky = useSky()
+  const { period, weather } = sky
+  useLightning(weather === 'storm')
+
+  // 0 dark, 1 half lit, 2 full daylight — but only as much as the sky
+  // outside has to give. At night opening the curtains lets in nothing;
+  // a rainy morning lifts the room one step, not two.
+  const open = (curtains.left % 2) + (curtains.right % 2)
+  const light = roomLight(open, sky)
 
   // Set on <html> rather than on the scene: the room's colour lives on
-  // the page background, which no descendant can reach.
+  // the page background, which no descendant can reach. The ray's colour
+  // rides along, for the shafts of light through the windows.
   useEffect(() => {
-    document.documentElement.dataset.light = String(light)
-  }, [light])
+    const root = document.documentElement
+    root.dataset.light = String(light)
+    root.dataset.curtains = String(open)
+    const ray = rayFor({ period, weather })
+    root.style.setProperty('--sky-ray', ray.rgb)
+    root.style.setProperty('--sky-ray-a', String(ray.strength))
+  }, [light, open, period, weather])
 
   const talkAboutLulu = useCallback((resting: boolean) => {
     const now = Date.now()
@@ -145,10 +235,18 @@ function App() {
       {/* Behind the glow, so the monitor spill washes across them the way
           it does the rest of the wall. */}
       <div className="scene__wall" aria-hidden="true">
+        {/* First on the wall, so the aircon and the windows paint over
+            him: that is what he hides behind. */}
+        <Pittuki wonwuu={ratTrack} onGlare={lizardGlared} onCaught={lizardCaught} />
         <Sprite name="props/aircon" className="scene__aircon" />
 
 
-        <WallWindow side="left" toggles={curtains.left} onToggle={openLeft}>
+        <WallWindow
+          side="left"
+          toggles={curtains.left}
+          onToggle={openLeft}
+          sky={<WindowSky sky={sky} side="left" />}
+        >
           {/* Hidden behind the shut curtain; a sliver shows against the
               glass once the drapes are drawn back, and only then does it
               take a click. */}
@@ -161,7 +259,17 @@ function App() {
             <Sprite name="props/pumpkin" />
           </button>
         </WallWindow>
-        <WallWindow side="right" toggles={curtains.right} onToggle={openRight} />
+        <WallWindow
+          side="right"
+          toggles={curtains.right}
+          onToggle={openRight}
+          overlay={<CroakNotes singing={singing} />}
+          sky={<WindowSky sky={sky} side="right" />}
+        >
+          {/* Heard before he is seen: the notes come over the curtain,
+              but he only shows once it is drawn back. */}
+          <Croakyangs singing={singing} onFound={frogFound} />
+        </WallWindow>
 
       </div>
 
@@ -222,7 +330,27 @@ function App() {
       {/* Lulu roams between the floor and the desk, so she needs the
           whole frame rather than the companion layer's fixed spot. */}
       <div className="scene__pets">
-        <Lulu onPet={talkAboutLulu} />
+        <Lulu
+          onPet={talkAboutLulu}
+          onMove={luluMoved}
+          controls={luluControls}
+          onBack={luluBack}
+        />
+        <Wonwuu
+          lulu={luluTrack}
+          resting={luluOut}
+          onSpotted={ratSpotted}
+          onCaught={ratCaught}
+          onMove={ratMoved}
+          controls={ratControls}
+        />
+      </div>
+
+      {/* Jord's Fork: a summoning circle on the floor, in front of the
+          animals, with the flaming trident it brings up. Same box as the
+          stage, so it keeps its spot in the room. */}
+      <div className="scene__ritual">
+        <JordsFork onCaught={forkCaught} />
       </div>
 
       {/* Over his head, below the dialog, in the same frame-shaped box as
@@ -253,11 +381,15 @@ function App() {
 
       <FairyCha
         anchor={stageRef}
-        resting={fairy || pumpkin || showcase}
+        resting={fairy || pumpkin || showcase || ratCaughtOpen || forkOpen || lizardOpen || serenade}
         onPass={fairyPassed}
         onCaught={caughtFairy}
       />
       {fairy && <FairyReveal onClose={closeFairy} />}
+      {ratCaughtOpen && <WonwuuReveal onClose={closeRat} />}
+      {forkOpen && <ForkReveal onClose={closeFork} />}
+      {lizardOpen && <PittukiReveal onClose={closeLizard} />}
+      {serenade && <SerenadeReveal onClose={closeSerenade} />}
 
       {elliSays && (
         <InteractionBox

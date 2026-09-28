@@ -22,16 +22,16 @@ html[data-light='1'] {
   --color-room: #1b1d22;
   --glow-strength: 0.55;
   --room-vignette: 0.94;
-  --room-vignette-in: 30%;
-  --room-vignette-out: 86%;
+  --room-vignette-in: 36%;
+  --room-vignette-out: 104%;
 }
 
 html[data-light='2'] {
   --color-room: #3c3f47;
   --glow-strength: 0.25;
   --room-vignette: 1;
-  --room-vignette-in: 24%;
-  --room-vignette-out: 78%;
+  --room-vignette-in: 30%;
+  --room-vignette-out: 96%;
 }
 
 body {
@@ -42,20 +42,17 @@ body {
   line-height: 1.5;
   color: var(--color-text);
 
-  /* A dark room: true black, with a faint CRT scanline wash and a
-     vignette so the edges fall away from the centre. */
+  /* A dark room: true black, with a faint CRT scanline wash. The
+     vignette is not down here: painted as page background it sat under
+     every sprite, so the animals and furniture stayed fully lit right
+     into the corners. It lives on an overlay above the room instead —
+     see `.scene::after` in App.css. */
   background-color: var(--color-room);
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      rgb(255 255 255 / 0.018) 0 1px,
-      transparent 1px 3px
-    ),
-    radial-gradient(
-      120% 90% at 50% 45%,
-      transparent var(--room-vignette-in),
-      rgb(0 0 0 / var(--room-vignette)) var(--room-vignette-out)
-    );
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.018) 0 1px,
+    transparent 1px 3px
+  );
   background-attachment: fixed;
   transition: background-color 1400ms ease-out;
 

@@ -1,0 +1,201 @@
+/* ============================================================
+   Jord's Fork reveal
+   ------------------------------------------------------------
+   The fourth easter-egg reveal: the floor's summoning circle opens
+   up big in the middle of the screen, and the fork rises out of it
+   in full detail to deliver a prophecy.
+
+   --jp is redefined here as the reveal's larger art pixel, so the
+   room's own keyframes — the stepped bob, the drift, the pillar, the
+   embers, the rise and sink — are reused as they are, just bigger.
+   ============================================================ */
+
+.fork-reveal {
+  --jp: calc(var(--scene-scale) * 1.4px);
+  /* The high-resolution sheet's 128px cell, drawn at 0.6 of the room's
+     scale — the same as Wonwuu's reveal. */
+  --fork-cell: calc(128px * var(--scene-scale) * 0.6);
+
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--px-8) var(--px-6);
+
+  background: rgb(10 2 0 / 0.82);
+  cursor: pointer;
+  animation: fork-reveal-in 300ms ease-out both;
+}
+
+@keyframes fork-reveal-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sized to the circle across and the fork plus the circle's front half
+   down, so it centres on the whole summoning rather than on either. */
+.fork-reveal__stage {
+  position: relative;
+  width: calc(var(--jp) * 61);
+  height: calc(var(--fork-cell) + var(--jp) * 12);
+  /* Lifted a little, to leave the dialog panel room underneath — but
+     only a little: any higher and the flames at the top of the fork's
+     bob run off the top of a 900px-tall screen. */
+  margin-bottom: calc(var(--px-16) * 1.5);
+}
+
+/* ── The circle ────────────────────────────────────────────── */
+
+.fork-reveal__circle {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(var(--jp) * 61);
+  height: calc(var(--jp) * 19);
+  overflow: visible;
+  filter:
+    drop-shadow(0 0 calc(var(--jp) * 0.6) #ffb066)
+    drop-shadow(0 0 calc(var(--jp) * 2) rgb(255 110 36 / 0.95))
+    drop-shadow(0 0 calc(var(--jp) * 6) rgb(255 70 20 / 0.7));
+  animation: fork-circle-pulse 1.7s ease-in-out 1.4s infinite;
+}
+
+.fork-reveal__circle .ritual-part--ring {
+  fill: #ff9442;
+}
+
+.fork-reveal__circle .ritual-part--star {
+  fill: #ff5a36;
+}
+
+.fork-reveal__circle .ritual-part--rune {
+  fill: #fff1c4;
+}
+
+/* Lit round the circle, part by part, the same as on the floor but
+   quicker: the ritual is already under way. */
+.fork-reveal__circle .ritual-part {
+  opacity: 0;
+  animation: fork-part-kindle 400ms steps(1, jump-end)
+    calc(var(--order) * var(--kindle-step)) both;
+}
+
+/* ── The fork ──────────────────────────────────────────────── */
+
+.fork-reveal__pillar {
+  position: absolute;
+  left: calc(50% - var(--jp) * 8);
+  bottom: calc(var(--jp) * 9.5);
+  width: calc(var(--jp) * 16);
+  height: calc(var(--fork-cell) * 1.1);
+  background: linear-gradient(
+    to top,
+    rgb(255 214 150 / 0.95),
+    rgb(255 120 44 / 0.6) 40%,
+    transparent
+  );
+  transform-origin: 50% 100%;
+  opacity: 0;
+  animation: fork-pillar 800ms ease-out 700ms both;
+}
+
+/* Everything above the circle's centre line, as in the room. */
+.fork-reveal__portal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--jp) * 9.5);
+  height: calc(var(--fork-cell) + var(--jp) * 10);
+  overflow: hidden;
+}
+
+.fork-reveal__lift {
+  position: absolute;
+  left: calc(50% - var(--fork-cell) / 2);
+  /* Just clear of the line, so the handle's tip is not trimmed. */
+  bottom: calc(var(--jp) * 1);
+  animation: fork-rise 800ms cubic-bezier(0.25, 0.8, 0.35, 1) 700ms both;
+}
+
+.fork-reveal__bob {
+  animation: fork-bob 3.2s steps(1, jump-end) 1.5s infinite;
+}
+
+.fork-reveal__drift {
+  animation: fork-drift 5.6s steps(1, jump-end) 1.5s infinite;
+}
+
+.fork-reveal .fork-reveal__art {
+  display: block;
+  --sprite-scale: calc(var(--scene-scale) * 0.6);
+}
+
+.fork-reveal__ember {
+  position: absolute;
+  left: calc(50% + var(--e-x) * var(--jp) * 60);
+  bottom: calc(var(--jp) * 9.5);
+  width: var(--jp);
+  height: var(--jp);
+  background: #ffb347;
+  opacity: 0;
+  animation: fork-ember 1.9s ease-out calc(1.2s + var(--e-i) * 190ms) infinite;
+}
+
+.fork-reveal__ember:nth-child(odd) {
+  background: #ff5a1f;
+}
+
+/* Ember-orange ring: violet is the pumpkin's, magenta the fairy's, lime
+   the rat's. */
+.fork-reveal__box {
+  box-shadow:
+    0 0 0 var(--box-px) #ff7b2e,
+    var(--px-3) var(--px-3) 0 0 rgb(0 0 0 / 0.55);
+}
+
+/* ── Closing ───────────────────────────────────────────────── */
+
+/* Own keyframes, not the entrance reversed — see pumpkin-reveal.css. */
+.fork-reveal[data-closing] {
+  animation: fork-reveal-out 500ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes fork-reveal-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Back down into the circle it came out of. */
+.fork-reveal[data-closing] .fork-reveal__lift {
+  animation: fork-sink 500ms cubic-bezier(0.6, 0, 0.9, 0.5) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fork-reveal,
+  .fork-reveal__circle,
+  .fork-reveal__pillar,
+  .fork-reveal__lift,
+  .fork-reveal__bob,
+  .fork-reveal__drift,
+  .fork-reveal__ember {
+    animation: none;
+  }
+
+  .fork-reveal__circle .ritual-part {
+    animation: none;
+    opacity: 1;
+  }
+}

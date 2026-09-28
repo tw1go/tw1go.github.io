@@ -1,0 +1,338 @@
+/* ============================================================
+   The sky outside the wall windows
+   ------------------------------------------------------------
+   Inside each window's frame, behind the glass. Everything is in
+   room pixels (--sp), so the sky sits on the same grid as the frame
+   around it: the gradient steps in bands rather than blending, and
+   the sun, moon, clouds, rain and lightning are pixel shapes.
+   ============================================================ */
+
+.window-sky {
+  --sp: var(--scene-pixel);
+
+  position: absolute;
+  /* Inside the frame's inner lip, which is its 1px padding. */
+  inset: var(--sp);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* One sky as wide as the whole frame, with each window offset into it by
+   where it hangs: its edge on the wall plus the frame's 2px border and
+   1px lip. */
+.window-sky__world {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: var(--frame);
+}
+
+.window-sky[data-side='left'] .window-sky__world {
+  left: calc(-1 * (var(--frame) * 0.06 + var(--sp) * 3));
+}
+
+.window-sky[data-side='right'] .window-sky__world {
+  left: calc(-1 * (var(--frame) * 0.94 - var(--win-w) + var(--sp) * 3));
+}
+
+/* ── The air ───────────────────────────────────────────────── */
+
+/* Four hard bands, top to bottom — stepped like the room's own light,
+   never a smooth blend. */
+.window-sky__air {
+  position: absolute;
+  inset: 0;
+  transition: filter 2s ease;
+}
+
+[data-period='dawn'] .window-sky__air {
+  background: linear-gradient(#2d2b5c 0 25%, #6e4b8e 25% 50%, #d97f8c 50% 75%, #f7b27a 75%);
+}
+
+[data-period='morning'] .window-sky__air {
+  background: linear-gradient(#4f95df 0 25%, #6fb0ec 25% 50%, #98cbf5 50% 75%, #c6e4fb 75%);
+}
+
+[data-period='afternoon'] .window-sky__air {
+  background: linear-gradient(#3b86da 0 25%, #5aa2e8 25% 50%, #82bdf1 50% 75%, #b3d9f8 75%);
+}
+
+[data-period='dusk'] .window-sky__air {
+  background: linear-gradient(#231d4a 0 25%, #6a3572 25% 50%, #c9587a 50% 75%, #ef9058 75%);
+}
+
+[data-period='night'] .window-sky__air {
+  background: linear-gradient(#05081a 0 25%, #0a1030 25% 50%, #111a40 50% 75%, #18234f 75%);
+}
+
+/* Weather greys the air rather than replacing it, so a rainy dusk is
+   still a dusk. */
+[data-weather='cloudy'] .window-sky__air {
+  filter: saturate(0.55) brightness(0.92);
+}
+
+[data-weather='rain'] .window-sky__air {
+  filter: saturate(0.35) brightness(0.62);
+}
+
+[data-weather='storm'] .window-sky__air {
+  filter: saturate(0.25) brightness(0.4);
+}
+
+[data-weather='fog'] .window-sky__air {
+  filter: saturate(0.3) brightness(1.08);
+}
+
+/* ── Sun and moon ──────────────────────────────────────────── */
+
+/* Positions are across the frame's width, so they land in one window:
+   the sun rises in the left and sets in the right, and the moon hangs
+   in the right. Heights are down the window.
+
+   All of them inside the part of the glass an open curtain actually
+   shows: the valance hangs over the top third and the tied-back drapes
+   cover the sides, which leaves the middle of each pane from about a
+   third of the way down. The left window's opening is centred on 13.8%
+   of the frame, the right's on 86.2%. */
+.window-sky__body {
+  position: absolute;
+  width: calc(var(--sp) * 7);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  mask-size: 100% 100%;
+  transition:
+    opacity 2s ease,
+    left 2s ease,
+    top 2s ease;
+}
+
+[data-period='dawn'] .window-sky__body {
+  left: 15%;
+  top: 76%;
+  background: #ffc07a;
+}
+
+[data-period='morning'] .window-sky__body {
+  left: 12.5%;
+  top: 42%;
+  background: #fff3b0;
+}
+
+[data-period='afternoon'] .window-sky__body {
+  left: 84.5%;
+  top: 40%;
+  background: #fff7cf;
+}
+
+[data-period='dusk'] .window-sky__body {
+  left: 88.5%;
+  top: 72%;
+  background: #ff9a5c;
+}
+
+[data-period='night'] .window-sky__body {
+  left: 87.5%;
+  top: 44%;
+  background: #e8ecff;
+}
+
+/* Gone behind rain cloud; a pale disc through fog. */
+[data-weather='rain'] .window-sky__body,
+[data-weather='storm'] .window-sky__body {
+  opacity: 0;
+}
+
+[data-weather='fog'] .window-sky__body {
+  opacity: 0.4;
+}
+
+/* ── Stars ─────────────────────────────────────────────────── */
+
+.window-sky__star {
+  position: absolute;
+  width: var(--sp);
+  height: var(--sp);
+  background: #f4f6ff;
+  opacity: 0;
+}
+
+/* Out at night, when the sky is clear enough to see them. */
+[data-period='night']:is([data-weather='clear'], [data-weather='cloudy']) .window-sky__star {
+  animation: sky-twinkle 2.6s steps(1, jump-end) infinite;
+}
+
+@keyframes sky-twinkle {
+  0% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ── Clouds ────────────────────────────────────────────────── */
+
+.window-sky__cloud {
+  --c-cycle: 80s;
+
+  position: absolute;
+  left: -8%;
+  width: calc(var(--sp) * 13 * var(--c-scale));
+  aspect-ratio: 13 / 5;
+  mask-size: 100% 100%;
+  background: #f2f6fb;
+  /* Across the whole sky, each at its own point in the crossing. */
+  animation: sky-drift var(--c-cycle) linear calc(var(--c-offset) * var(--c-cycle) * -1) infinite;
+}
+
+@keyframes sky-drift {
+  from {
+    left: -8%;
+  }
+  to {
+    left: 104%;
+  }
+}
+
+[data-weather='cloudy'] .window-sky__cloud {
+  background: #d5dde6;
+}
+
+[data-weather='rain'] .window-sky__cloud {
+  background: #8a96a6;
+}
+
+[data-weather='storm'] .window-sky__cloud {
+  --c-cycle: 45s;
+  background: #4a5362;
+}
+
+[data-period='night'] .window-sky__cloud {
+  background: #2a3350;
+}
+
+[data-period='dawn'] .window-sky__cloud,
+[data-period='dusk'] .window-sky__cloud {
+  background: #e8b6b0;
+}
+
+[data-period='dawn'][data-weather='rain'] .window-sky__cloud,
+[data-period='dusk'][data-weather='rain'] .window-sky__cloud,
+[data-period='dawn'][data-weather='storm'] .window-sky__cloud,
+[data-period='dusk'][data-weather='storm'] .window-sky__cloud {
+  background: #6e6478;
+}
+
+/* ── Rain ──────────────────────────────────────────────────── */
+
+.window-rain {
+  /* A finer pixel than the rest of the sky, so the drops read as thin
+     streaks rather than blocks. */
+  --rp: calc(var(--sp) * 0.4);
+  /* How far a drop blows sideways over one fall. Negative: the wind is
+     from the right. Matches the lean of the drop's own pixels. */
+  --wind: -28;
+
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.window-rain[data-kind='storm'] {
+  --wind: -40;
+}
+
+.window-rain__drop {
+  position: absolute;
+  top: -12%;
+  width: calc(var(--rp) * 3);
+  height: calc(var(--rp) * 4);
+  mask-size: 100% 100%;
+  background: rgb(200 218 240 / 0.75);
+  animation-name: rain-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Down the full height of the glass and across with the wind, along the
+   same slant the drop's pixels lean at. */
+@keyframes rain-fall {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(calc(var(--sp) * var(--wind)), calc(var(--sp) * 46));
+  }
+}
+
+/* ── Fog ───────────────────────────────────────────────────── */
+
+.window-sky__fog {
+  position: absolute;
+  inset: 0;
+  display: none;
+  /* Bands of mist in whole-pixel steps, drifting slowly sideways. */
+  background:
+    linear-gradient(
+      transparent 0 30%,
+      rgb(222 228 236 / 0.55) 30% 45%,
+      transparent 45% 58%,
+      rgb(222 228 236 / 0.7) 58% 80%,
+      rgb(222 228 236 / 0.4) 80%
+    );
+  animation: sky-fog 9s ease-in-out infinite alternate;
+}
+
+[data-weather='fog'] .window-sky__fog {
+  display: block;
+}
+
+@keyframes sky-fog {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(var(--sp) * 6));
+  }
+}
+
+/* ── Lightning ─────────────────────────────────────────────── */
+
+/* The strike itself is timed from JS (html[data-flash]), so both windows
+   and the room flash together. */
+.window-sky__flash {
+  position: absolute;
+  inset: 0;
+  background: #f4f7ff;
+  opacity: 0;
+}
+
+.window-sky__bolt {
+  position: absolute;
+  /* In the right window's opening, below the valance. */
+  left: 84%;
+  top: 34%;
+  width: calc(var(--sp) * 5);
+  aspect-ratio: 5 / 8;
+  mask-size: 100% 100%;
+  background: #fffbe0;
+  opacity: 0;
+}
+
+html[data-flash] [data-weather='storm'] .window-sky__flash {
+  opacity: 0.8;
+}
+
+html[data-flash] [data-weather='storm'] .window-sky__bolt {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window-sky__cloud,
+  .window-rain__drop,
+  .window-sky__fog,
+  .window-sky__star {
+    animation: none;
+  }
+}

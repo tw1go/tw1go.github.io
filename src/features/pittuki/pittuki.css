@@ -1,0 +1,56 @@
+/* Pittuki the house lizard. Lives in the wall layer, underneath the air
+   conditioner and the windows, so he can hide behind them; positioned in
+   percent of that layer, which mirrors the character's frame. */
+.pittuki {
+  /* The wall furniture's scale, not the animals': he is on the wall with
+     the aircon and the curtains, and at their pixel size he comes out
+     comfortably smaller than Wonwuu. */
+  --pk-scale: calc(var(--scene-scale) * 0.4);
+
+  position: absolute;
+  left: var(--pk-x);
+  top: var(--pk-y);
+  /* Centred on his point, then flipped to face his heading. Flips only —
+     never a rotation, which would knock the pixel art off its grid. */
+  transform: translate(-50%, -50%) scale(var(--pk-sx), var(--pk-sy));
+  transition:
+    left var(--pk-move) linear,
+    top var(--pk-move) linear;
+
+  padding: 0;
+  border: 0;
+  background: none;
+  /* The wall layer is click-through, so the room behind it stays
+     clickable; he opts back in, as the curtains do. */
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pittuki:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.pittuki:focus-visible {
+  outline: var(--px) solid var(--color-highlight);
+  outline-offset: calc(var(--px) * -2);
+}
+
+.pittuki .pittuki__sprite {
+  display: block;
+  --sprite-scale: var(--pk-scale);
+}
+
+/* Over his head, in the sheet's own coordinates; his flips carry it with
+   him, so it is always at the head end. */
+.pittuki__mark {
+  left: 30%;
+  bottom: 88%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pittuki {
+    transition: none;
+  }
+}

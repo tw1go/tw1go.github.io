@@ -152,3 +152,203 @@ export function pickFairyBlessing(): string {
     FAIRY_BLESSINGS[Math.floor(Math.random() * FAIRY_BLESSINGS.length)]
   return `${FAIRY_OPENER} ${blessing}`
 }
+
+/** Who speaks when Wonwuu is caught. */
+export const WONWUU_SPEAKER = 'Wonwuu the Wandering Rat'
+
+/*
+ * The pumpkin curses you and the fairy blesses you. Wonwuu does neither:
+ * he is a small-time thief with a strict code, and the code says every
+ * theft is a trade. What he takes and what he leaves are drawn
+ * separately, so the pairings keep surprising — and the exchange rate is
+ * always, reliably, in his favour.
+ */
+const WONWUU_OPENERS = [
+  "Squeak! Nobody spots Wonwuu. Fine. You know the rules — I'm a thief, but I'm a fair one.",
+  "You saw me. That's rude. Seeing a rat means a toll, and I'm collecting it now.",
+  "Caught, am I? Not for long. But a gentleman never leaves empty-handed. Or without leaving something.",
+  // Jord, of the fork, is his night-shift friend: both of them up when
+  // they have no business being.
+  "Squeak! Jord said you'd come snooping. He's my night-shift buddy — we're both up when we shouldn't be. Anyway. The toll.",
+]
+
+/** What he makes off with. */
+const WONWUU_TAKES = [
+  'the last bite of your snack',
+  'your left sock — just the left one',
+  'the charger you were about to look for',
+  'the good pen',
+  'every hair tie you have ever owned',
+  'your spot in the queue',
+  'the lid to your favourite container',
+  'the password you swore you would remember',
+  'the crispy bit at the bottom of the pan',
+  'one AirPod, and I picked which',
+  'the word that was on the tip of your tongue',
+  'the ten minutes you had spare this morning',
+]
+
+/** What he leaves behind in exchange. Always worse. Always. */
+const WONWUU_LEAVES = [
+  'a single crouton',
+  'a button off a coat you do not own',
+  'a slightly damp raisin',
+  'a receipt for someone else’s shopping',
+  'half a paperclip',
+  'one sock — a different one',
+  'a very small, very confident pebble',
+  'a crumb of an unknown biscuit',
+  'a key to a door that no longer exists',
+  'a sunflower seed, pre-sniffed',
+  'the pen that almost works',
+  'a strand of cheese. For luck.',
+  // His mortal enemy, the lizard on the wall.
+  "the business card of a lizard who calls himself a doctor. Don't book. He bills by the minute",
+]
+
+const pick = <T,>(items: readonly T[]) => items[Math.floor(Math.random() * items.length)]
+
+export function pickWonwuuTrade(): string {
+  return `${pick(WONWUU_OPENERS)} I'll be taking ${pick(WONWUU_TAKES)}, and leaving you ${pick(WONWUU_LEAVES)}. Pleasure doing business. Squeak.`
+}
+
+/** Who speaks when Jord's Fork is caught. */
+export const JORDS_FORK_SPEAKER = "Jord's Fork"
+
+/*
+ * The pumpkin curses, the fairy blesses, the rat trades. The fork
+ * foretells.
+ *
+ * It belongs to Jord, a friend of twigo's from online: works the night
+ * shift, runs on four or five hours of sleep, witty, and constitutionally
+ * incapable of doing what he is told. The fork has taken after him. It
+ * introduces itself with all the dread a flaming trident can muster,
+ * then delivers a prophecy that is completely ordinary — and certain to
+ * come true. Jord and Wonwuu are friends, which comes up.
+ */
+const JORDS_FORK_OPENERS = [
+  "Mortal. You have laid a hand on the Fork of Jord — forged on the night shift, tempered on four hours of sleep, sworn enemy of every alarm clock ever made. It has seen your future:",
+  "Kneel. Or don't — Jord never does. I am his Fork, the flame that clocks in when the sun clocks out. I have seen what is coming for you:",
+  "You summoned me at an hour when Jord is either still at work or pretending he is about to sleep. Either way, the Fork sees all. Hear it:",
+]
+
+const JORDS_FORK_PROPHECIES = [
+  // His, in spirit.
+  'You will set five alarms tomorrow. You will snooze all five, and Jord will call it a warm-up.',
+  "Tonight you will say 'one more episode' and mean four. Jord respects the rebellion.",
+  'Someone will tell you to get an early night. You will not. Jord is quietly proud of you.',
+  'You will call four hours of sleep "basically a full night". You are one of us now.',
+  'Your coffee will go cold before you drink it. You will drink it anyway, like a professional.',
+  'You will be told there is a rule. You will ask "says who?" and nobody will have an answer.',
+  // Ordinary, and inescapable.
+  "Before the week is out, a waiter will say 'enjoy your meal' and you will answer 'you too'.",
+  'A door will say PULL. You will push. It was always going to be this way.',
+  'You will open the fridge three times in a row, as though its contents might have changed.',
+  "Your next 'quick five-minute task' will take the entire afternoon.",
+  'You will find the thing you lost the moment after you buy a replacement.',
+  'You will say goodbye to someone, then walk off in the same direction as them.',
+]
+
+const JORDS_FORK_CLOSERS = [
+  'So it is foretold.',
+  "So it is foretold. If you see a rat called Wonwuu, he's with us — Jord vouches for him.",
+  'So it is foretold. Now go to sleep. One of us should.',
+  'So it is foretold. Jord would add something witty here, but his shift just started.',
+]
+
+export function pickJordsProphecy(): string {
+  return `${pick(JORDS_FORK_OPENERS)} ${pick(JORDS_FORK_PROPHECIES)} ${pick(JORDS_FORK_CLOSERS)}`
+}
+
+/** Who speaks when Pittuki is caught. */
+export const PITTUKI_SPEAKER = 'Dr. Pittuki'
+
+/*
+ * The pumpkin curses, the fairy blesses, the rat trades, the fork
+ * foretells. Pittuki diagnoses.
+ *
+ * A house lizard and a psychiatrist: dark sense of humour, a weakness
+ * for spending money and for matcha, and underneath all of it extra,
+ * extra kind. So a session goes diagnosis, prescription, then something
+ * genuinely warm to finish. He and Wonwuu are mortal enemies — in real
+ * life it is friendly banter, here it is war.
+ */
+const PITTUKI_OPENERS = [
+  'Ah. Dr. Pittuki — house lizard, licensed psychiatrist. Lie back. The wall is fine, I do all my sessions up here. Now, then.',
+  "Come in, come in. Dr. Pittuki. If you've met the rat, I'm so sorry. Nobody should have to meet the rat. Let's begin.",
+  "Dr. Pittuki will see you now. I've read your file. Twice. Honestly, a page-turner.",
+]
+
+const PITTUKI_DIAGNOSES = [
+  "you've been saying you're 'fine' for years. Clinically, that is a scream wearing a nice jumper.",
+  'you doom-scroll at 2am like it is a job. It does not pay, and the benefits are terrible.',
+  'you apologise to furniture when you walk into it. The furniture is fine. You should be too.',
+  'forty tabs open, because closing one feels like a small death. It is. Close them anyway.',
+  "you make the joke about your own misfortune before anyone else can. Textbook. Also, genuinely funny.",
+  "you're running on caffeine and spite, and the spite is load-bearing.",
+  "you've said 'I'll sleep when I'm dead' so often your body has started treating it as a booking.",
+  'you replay one conversation from years ago every night. The other person has forgotten it. They may also have been eaten by something. Let it go.',
+  "you've been talking to a rat called Wonwuu. That alone explains a great deal.",
+]
+
+const PITTUKI_PRESCRIPTIONS = [
+  'one iced matcha latte, oat milk, taken immediately',
+  'buy the thing sitting in your basket. Yes, that one. Checkout is a clinical procedure',
+  'ceremonial-grade matcha, and something small and unnecessary from a shop with nice lighting',
+  'retail therapy, twice daily, with meals',
+  'a matcha, a nap, and one purchase you cannot quite justify',
+  "treat yourself. I've already put it on your card. No, don't thank me",
+]
+
+const PITTUKI_CLOSERS = [
+  "And listen — you're doing so much better than you think. I mean it. This session's free. For you, always.",
+  "Also, I'm proud of you. That isn't in my notes. It's just true.",
+  "Be gentle with yourself today. Doctor's orders. The matcha's on me.",
+  'And whatever that rat told you: you are wonderful, and he is a rat.',
+]
+
+export function pickPittukiSession(): string {
+  return `${pick(PITTUKI_OPENERS)} Diagnosis: ${pick(PITTUKI_DIAGNOSES)} Prescription: ${pick(PITTUKI_PRESCRIPTIONS)}. ${pick(PITTUKI_CLOSERS)}`
+}
+
+/** Who speaks when Croakyangs is found. */
+export const CROAK_SPEAKER = 'Croakyangs'
+
+/*
+ * The pumpkin curses, the fairy blesses, the rat trades, the fork
+ * foretells, the lizard diagnoses. Croakyangs serenades.
+ *
+ * A friend of twigo's, and a frog because on night after night of group
+ * calls there was a frog audible in his background. He is lonesome —
+ * out of a bad relationship and looking for someone who will stay — so
+ * every song is a love song, a little bruised and a lot hopeful.
+ */
+const CROAK_OPENERS = [
+  "Oh — you found me. Everyone on the group call can always hear me, nobody ever finds me. Croakyangs. This one's for you:",
+  "Every night someone on the call says 'wait, is that a frog?'. Yes. It's me. It's always been me. Anyway, I wrote a song:",
+  "Shh. Don't open the curtain all the way, the moon's doing my lighting. Croakyangs, singer, frog, currently single. Ahem:",
+]
+
+/* Two lines each, written for him. The '/' is sung as a pause. */
+const CROAK_SONGS = [
+  "I sat by the window and sang to the rain / the rain didn't answer — it's my ex all over again",
+  'One lily pad, and a table for two / the second chair is empty, and it is waiting for you',
+  "They said that I croak too much, loudly, at night / they just never learned how to listen right",
+  "I'm on every group call, just out of view / singing in the background, singing it for you",
+  'My last love was a pond full of rain gone sour / now I am clean water, and I bloom by the hour',
+  "Kiss me and maybe I'll turn into a prince / or don't — I'm still lovely, I've been lovely since",
+  "The moon's in the window, the curtain's half drawn / I'll sing until somebody stays until dawn",
+  'I gave all my flies to a heart that was cold / now I am saving the warm ones for someone to hold',
+]
+
+const CROAK_CLOSERS = [
+  'Too much? My ex said it was too much. Anyway. Are you single? No pressure. Croak.',
+  'If you know anyone who likes a frog with feelings, tell them where the window is.',
+  "That one's for whoever's out there. I'll be here. I'm always here. Croak.",
+  'Thank you, thank you. Tips accepted in flies. And in love — mostly love.',
+]
+
+export function pickCroakSong(): string {
+  // The song on a line of its own, so it reads as sung rather than said.
+  return `${pick(CROAK_OPENERS)}\n♪ ${pick(CROAK_SONGS)} ♪\n${pick(CROAK_CLOSERS)}`
+}

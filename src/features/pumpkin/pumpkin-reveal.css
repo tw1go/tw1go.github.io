@@ -22,6 +22,15 @@
   animation: pumpkin-backdrop 240ms ease-out both;
 }
 
+@keyframes pumpkin-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes pumpkin-backdrop {
   from {
     opacity: 0;
@@ -103,14 +112,19 @@
   display: block;
 }
 
-/* Back down where it came from. Separate keyframes rather than the rise
-   reversed: reusing an animation-name keeps the finished instance and
-   its elapsed time, which snaps straight to the far end. */
+/* Its own keyframes, not the entrance played in reverse. Swapping only
+   the direction on an animation that has already finished does not
+   restart it: it stays at its end time, which reversed is the *start*,
+   so the overlay dropped straight to invisible and took everything in it
+   along — no exit at all. */
 .pumpkin-reveal[data-closing] {
-  animation: pumpkin-backdrop 300ms ease-in reverse forwards;
+  animation: pumpkin-backdrop-out 300ms ease-in forwards;
   pointer-events: none;
 }
 
+/* Back down where it came from. Separate keyframes rather than the rise
+   reversed: reusing an animation-name keeps the finished instance and
+   its elapsed time, which snaps straight to the far end. */
 .pumpkin-reveal[data-closing] .pumpkin-reveal__rise {
   animation: pumpkin-drop 300ms ease-in forwards;
 }

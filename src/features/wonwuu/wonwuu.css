@@ -1,0 +1,50 @@
+/* Wonwuu the rat. Shares Lulu's layer, which mirrors the character's
+   frame, so his percentages are the same room coordinates as hers. */
+.wonwuu {
+  /* Lulu's own scale: his sheet is redrawn on the same pixel size as
+     hers, so the two animals share one grid. */
+  --wonwuu-scale: calc(var(--scene-scale) * 0.6);
+
+  position: absolute;
+  left: var(--w-x);
+  /* 4 empty cell rows sit under his feet in every frame. */
+  bottom: calc(var(--w-bottom) - 4px * var(--wonwuu-scale));
+  /* Drawn facing left, so facing right (1) is the flipped one. */
+  transform: translateX(-50%) scaleX(calc(var(--w-face) * -1));
+  transition: left var(--w-move) linear;
+
+  /* The pets' layer is click-through; he opts back in. */
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wonwuu:disabled {
+  cursor: default;
+}
+
+.wonwuu:focus-visible {
+  outline: var(--px) solid var(--color-highlight);
+  outline-offset: calc(var(--px) * -2);
+}
+
+.wonwuu .wonwuu__sprite {
+  display: block;
+  --sprite-scale: var(--wonwuu-scale);
+}
+
+/* Over his head. In the sheet's own (left-facing) coordinates — the
+   parent's flip carries it round with him. */
+.wonwuu__alert {
+  left: 30%;
+  bottom: 70%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wonwuu {
+    transition: none;
+  }
+}
