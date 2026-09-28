@@ -1,0 +1,160 @@
+/* Hung over the PC tower. Lives in the dialog layer, which mirrors the
+   character's 256px frame, so it is placed by the tower's own rows and
+   columns in the art: columns 188-221 (73-86%), top at row 92 (36%).
+
+   The right-hand window starts at 78.4% of the frame, behind the tower,
+   so the box is hung off to the left of that edge rather than centred
+   on the tower, with its tail at the right end pointing down onto the
+   tower's left half — clear of the window's glass. */
+.game-tag {
+  --tag-px: max(2px, calc(var(--scene-scale) * 0.8px));
+  --tag-bg: color-mix(in srgb, var(--twigo-ink) 88%, #000);
+  --tag-edge: var(--twigo-lime);
+
+  position: absolute;
+  /* Its right edge on the window's left edge. */
+  left: 78%;
+  /* Just clear of the tower's top, with room for the tail. */
+  bottom: calc(64% + var(--tag-px) * 4);
+  translate: -100% 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--tag-px) * 0.5);
+  width: max-content;
+  max-width: min(28ch, 40vw);
+  padding: calc(var(--tag-px) * 2) calc(var(--tag-px) * 4);
+
+  font-family: var(--font-body);
+  line-height: 1.2;
+  text-align: center;
+  color: #fff;
+
+  background: var(--tag-bg);
+  border: var(--tag-px) solid var(--tag-edge);
+  /* Hard offset, no blur, like the rest of the room. */
+  box-shadow: var(--tag-px) var(--tag-px) 0 0 rgb(0 0 0 / 0.55);
+
+  animation: game-tag-in 220ms steps(1, jump-end) both;
+}
+
+/* The tail, pointing down at the tower: a stepped triangle, drawn as a
+   clip-path of whole pixels so it keeps hard edges. Outline first, fill
+   on top. */
+.game-tag::before,
+.game-tag::after {
+  content: '';
+  position: absolute;
+  /* Near the right end, over the tower. */
+  left: calc(100% - var(--tag-px) * 7);
+  translate: -50% 0;
+}
+
+.game-tag::before {
+  top: 100%;
+  width: calc(var(--tag-px) * 6);
+  height: calc(var(--tag-px) * 3);
+  background: var(--tag-edge);
+  clip-path: polygon(0 0, 100% 0, 100% 33.3%, 83.3% 33.3%, 83.3% 66.6%, 66.6% 66.6%, 66.6% 100%, 33.3% 100%, 33.3% 66.6%, 16.6% 66.6%, 16.6% 33.3%, 0 33.3%);
+}
+
+.game-tag::after {
+  top: calc(100% - var(--tag-px) * 0.01);
+  width: calc(var(--tag-px) * 4);
+  height: calc(var(--tag-px) * 2);
+  background: var(--tag-bg);
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 75% 50%, 75% 100%, 25% 100%, 25% 50%, 0 50%);
+}
+
+.game-tag__label {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--tag-px) * 1.5);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--twigo-lime);
+}
+
+/* A "live" light, blinking in whole steps. */
+.game-tag__dot {
+  width: calc(var(--tag-px) * 1.5);
+  height: calc(var(--tag-px) * 1.5);
+  background: var(--twigo-green);
+  animation: game-tag-blink 1.4s steps(1, jump-end) infinite;
+}
+
+.game-tag__name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.05rem;
+}
+
+.game-tag__meta {
+  font-size: 0.7rem;
+  color: var(--color-text-dim);
+}
+
+/* Pops up out of the tower, stepped like twigo's own bubble. */
+@keyframes game-tag-in {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(var(--tag-px) * 3)) scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.game-tag[data-leaving] {
+  animation: game-tag-out 220ms steps(1, jump-end) forwards;
+}
+
+@keyframes game-tag-out {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--tag-px) * 3)) scale(0.8);
+  }
+}
+
+@keyframes game-tag-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Short screens: smaller type, so it stays above the tower rather than
+   reaching up into the sign. */
+@media (max-height: 500px) {
+  .game-tag__label,
+  .game-tag__meta {
+    font-size: 0.55rem;
+  }
+
+  .game-tag__name {
+    font-size: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-tag,
+  .game-tag[data-leaving],
+  .game-tag__dot {
+    animation: none;
+  }
+}

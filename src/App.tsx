@@ -36,6 +36,8 @@ import { useNowPlaying } from './features/spotify/useNowPlaying'
 import { useCharacterAnimation } from './hooks/useCharacterAnimation'
 import { useSceneScale } from './hooks/useSceneScale'
 import { RotatePrompt } from './features/rotate/RotatePrompt'
+import { GameTag } from './features/discord/GameTag'
+import { useDiscordGame } from './features/discord/presence'
 import { playDuration } from './sprites/manifest'
 import './App.css'
 
@@ -51,6 +53,8 @@ const PESTER_MS = 1500
 function App() {
   const play = useCharacterAnimation()
   const sceneScale = useSceneScale()
+  // What twigo is playing on Discord right now, if anything.
+  const game = useDiscordGame()
   // Lifted out of NowPlaying so the strip and the floating notes share a
   // single poll — calling the hook in both would double the request rate.
   const nowPlaying = useNowPlaying()
@@ -298,6 +302,7 @@ function App() {
           the bubble was stuck in that element's stacking context, so the
           sign and the now-playing strip painted over it. */}
       <div className="scene__dialog">
+        <GameTag game={game} />
         {dialog && (
           <DialogBubble
             key={dialog.id}
