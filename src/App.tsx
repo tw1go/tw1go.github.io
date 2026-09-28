@@ -34,6 +34,8 @@ import { FairyReveal } from './features/fairy/FairyReveal'
 import { LoveHearts } from './features/fairy/LoveHearts'
 import { useNowPlaying } from './features/spotify/useNowPlaying'
 import { useCharacterAnimation } from './hooks/useCharacterAnimation'
+import { useSceneScale } from './hooks/useSceneScale'
+import { RotatePrompt } from './features/rotate/RotatePrompt'
 import { playDuration } from './sprites/manifest'
 import './App.css'
 
@@ -48,6 +50,7 @@ const PESTER_MS = 1500
 
 function App() {
   const play = useCharacterAnimation()
+  const sceneScale = useSceneScale()
   // Lifted out of NowPlaying so the strip and the floating notes share a
   // single poll — calling the hook in both would double the request rate.
   const nowPlaying = useNowPlaying()
@@ -231,7 +234,10 @@ function App() {
   }, [])
 
   return (
-    <main className="scene">
+    <main
+      className="scene"
+      style={{ '--scene-scale': sceneScale } as React.CSSProperties}
+    >
       {/* Behind the glow, so the monitor spill washes across them the way
           it does the rest of the wall. */}
       <div className="scene__wall" aria-hidden="true">
@@ -390,6 +396,8 @@ function App() {
       {forkOpen && <ForkReveal onClose={closeFork} />}
       {lizardOpen && <PittukiReveal onClose={closeLizard} />}
       {serenade && <SerenadeReveal onClose={closeSerenade} />}
+
+      <RotatePrompt />
 
       {elliSays && (
         <InteractionBox

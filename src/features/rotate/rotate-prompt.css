@@ -1,0 +1,91 @@
+/* Hidden unless a phone is held upright. Tablets upright are left alone:
+   at their width the room still fits comfortably across. */
+.rotate-prompt {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 700px) {
+  .rotate-prompt {
+    position: fixed;
+    inset: 0;
+    /* Over everything, reveals included. */
+    z-index: 40;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--px-4);
+    padding: var(--px-8);
+
+    background: radial-gradient(
+        circle at 50% 42%,
+        rgb(var(--twigo-violet-rgb) / 0.22),
+        transparent 60%
+      ),
+      #05060c;
+    color: var(--color-text);
+    text-align: center;
+  }
+}
+
+/* Upright, then tipped onto its side, held, and back: the motion itself
+   says what to do. Eased so the turn reads as a hand turning a phone. */
+.rotate-prompt__phone {
+  width: 88px;
+  height: auto;
+  margin-bottom: var(--px-6);
+  image-rendering: pixelated;
+  animation: rotate-tilt 2.8s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+
+@keyframes rotate-tilt {
+  0%,
+  18% {
+    transform: rotate(0deg);
+  }
+  42%,
+  72% {
+    transform: rotate(-90deg);
+  }
+  96%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.rotate-prompt__title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: var(--twigo-lime);
+}
+
+.rotate-prompt__body {
+  font-size: 1rem;
+  color: var(--color-text-dim);
+}
+
+.rotate-prompt__skip {
+  margin-top: var(--px-6);
+  padding: var(--px-2) var(--px-4);
+  border: var(--px) solid var(--color-border);
+  border-radius: var(--px);
+  background: none;
+  color: var(--color-text-dim);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.rotate-prompt__skip:focus-visible {
+  outline: var(--px) solid var(--twigo-lime);
+  outline-offset: var(--px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotate-prompt__phone {
+    animation: none;
+    transform: rotate(-90deg);
+  }
+}

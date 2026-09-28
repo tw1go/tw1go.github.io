@@ -236,3 +236,16 @@
     animation: none;
   }
 }
+
+/* Phones held sideways: short enough that a full-size panel would cover
+   most of the room. Smaller type, less padding, closer to the edge. */
+@media (max-height: 500px) {
+  .interaction {
+    font-size: 0.95rem;
+    line-height: 1.35;
+    gap: var(--px-2);
+    padding: var(--px-2) var(--px-4) var(--px-3);
+    bottom: var(--px-6);
+  }
+}
+

@@ -487,7 +487,7 @@ html[data-flash][data-curtains='2'] .scene::before {
 .scene__wordmark {
   /* One font-pixel of the Minecraft face at this size, near enough.
      Drives the emboss offset so the shading lands on the glyph grid. */
-  --sign-px: 5px;
+  --sign-px: var(--scene-pixel);
   --sign-core: var(--twigo-lime);
   --sign-highlight: color-mix(in srgb, var(--twigo-lime) 45%, #fff);
   --sign-emboss: color-mix(in srgb, var(--twigo-green) 38%, #000);
@@ -539,7 +539,10 @@ html[data-flash][data-curtains='2'] .scene::before {
   z-index: 1;
 
   font-family: var(--font-display);
-  font-size: 4rem;
+  /* Grows and shrinks with the room: 64px at the scale it was drawn for
+     (5). A fixed size overwhelmed the wall on a phone and shrank to
+     nothing on a big screen. */
+  font-size: calc(var(--scene-scale) * 12.8px);
   letter-spacing: 0.24em;
   /* letter-spacing also trails the last glyph, which drags the centred
      box left; an equal lead-in puts the word back on centre. */
@@ -612,32 +615,39 @@ html[data-flash][data-curtains='2'] .scene::before {
 }
 
 /* ── Responsive ───────────────────────────────────────────────
-   Whole-number steps only, so the pixel grid never lands on a half
-   pixel. Only 188 of the frame's 256 columns hold art, so each step
-   can hang on a little past its nominal width and let the empty
-   edges clip. */
+   --scene-scale is set on .scene from JS (hooks/useSceneScale), which
+   fits the room to the width and the height together and keeps it a
+   whole number. The 5 in .scene is only the first-paint fallback. */
 
-@media (max-width: 1100px) {
-  .scene {
-    --scene-scale: 4;
+/* Phones held sideways are short: the panel and the now-playing strip
+   shrink so they do not sit on top of the character. */
+@media (max-height: 500px) {
+  .now-playing {
+    bottom: var(--px-2);
+    max-width: min(70vw, 360px);
+    padding: var(--px) var(--px-2);
+    font-size: 0.72em;
   }
-}
 
-@media (max-width: 900px) {
-  .scene {
-    --scene-scale: 3;
+  .now-playing .now-playing__art {
+    width: 32px;
+    height: 32px;
   }
-}
 
-@media (max-width: 700px) {
-  .scene {
-    --scene-scale: 2;
+  /* Its lines are sized in rem, so the strip's own font-size cannot
+     reach them. */
+  .now-playing .now-playing__title,
+  .now-playing .now-playing__empty {
+    font-size: 0.8rem;
   }
-}
 
-@media (max-width: 420px) {
-  .scene {
-    --scene-scale: 1;
+  .now-playing .now-playing__artist {
+    font-size: 0.7rem;
+  }
+
+  .now-playing .now-playing__equalizer {
+    height: 10px;
+    margin-bottom: 1px;
   }
 }
 

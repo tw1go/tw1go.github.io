@@ -65,6 +65,11 @@
   /* The sky is laid across the whole opening, so the sash bar between
      the panes is drawn over it (::after) rather than being the frame's
      own background showing through the gap. */
+  /* Its own stacking context, so the sky, the glass and the sash can be
+     ordered among themselves without the glass's z-index escaping the
+     frame — out here it painted over whatever sits in the window, and
+     swallowed the clicks meant for Croakyangs on the sill. */
+  isolation: isolate;
 
   box-shadow:
     /* Hard offset, no blur — the same rule the rest of the room follows. */
@@ -226,7 +231,10 @@ html[data-flash] .wall-window[data-open] .wall-window__ray {
 /* Bigger than the window and centred on it, so the closed sheet covers
    the glass with margin to spare. */
 .wall-window .wall-window__curtain {
-  --sprite-scale: 2;
+  /* 0.4 of the room's scale, like the other wall furniture — 2 at the
+     desktop scale it was drawn at. A fixed 2 left the drapes the same
+     size at every screen size, so on a phone they swamped the window. */
+  --sprite-scale: calc(var(--scene-scale) * 0.4);
 
   /* The sheet is painted a strong blue, which pulls the eye straight to
      the corners of a room whose palette is violet and lime. Draining the
