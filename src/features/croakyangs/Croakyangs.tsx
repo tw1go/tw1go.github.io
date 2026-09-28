@@ -54,7 +54,11 @@ export function Croakyangs({ singing, onFound }: CroakyangsProps) {
       onClick={onFound}
       aria-label="Croakyangs the singing frog"
     >
-      <Sprite key={phase} name={SPRITE[phase]} />
+      {/* The crop lives on this inner box rather than the button, so the
+          button's enlarged tap area (::before) is not clipped with him. */}
+      <span className="croakyangs__crop">
+        <Sprite key={phase} name={SPRITE[phase]} />
+      </span>
     </button>
   )
 }

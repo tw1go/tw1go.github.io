@@ -15,8 +15,28 @@
      and the base of his belly — below the rail. Cropped rather than
      layered behind the frame, because behind the frame he would be
      behind the glass as well. */
+}
+
+.croakyangs__crop {
+  display: block;
   height: calc(var(--croak-px) * 27);
   overflow: hidden;
+}
+
+/* A bigger target for fingers. On a phone he is only about 26px across,
+   well under the ~44px a thumb needs, so on touch screens an invisible
+   hit area reaches out round him — at least 48px square, centred on him,
+   however small the room is drawn. Mice keep the exact outline. */
+@media (pointer: coarse) {
+  .wall-window__secret.croakyangs::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 48px);
+    height: max(100%, 48px);
+    translate: -50% -50%;
+  }
 }
 
 .wall-window__secret.croakyangs .sprite {
