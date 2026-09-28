@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Sprite } from './components/Sprite'
 import { WallWindow } from './components/WallWindow'
 import { Elli } from './features/companion/Elli'
-import { Lulu, type LuluControls } from './features/companion/Lulu'
+import { Lulu, type LuluControls, type LuluMood } from './features/companion/Lulu'
 import { Wonwuu, type WonwuuControls } from './features/wonwuu/Wonwuu'
 import { Pittuki } from './features/pittuki/Pittuki'
 import { PittukiReveal } from './features/pittuki/PittukiReveal'
@@ -218,7 +218,7 @@ function App() {
     root.style.setProperty('--sky-ray-a', String(ray.strength))
   }, [light, open, period, weather])
 
-  const talkAboutLulu = useCallback((resting: boolean) => {
+  const talkAboutLulu = useCallback((mood: LuluMood) => {
     const now = Date.now()
     luluStreak.current =
       now - luluLastAt.current < PESTER_MS ? luluStreak.current + 1 : 0
@@ -232,7 +232,7 @@ function App() {
         : luluSeen.current === 0
           ? // Introducing her wins even if she is fast asleep.
             LULU_INTRO
-          : (pickLine(resting ? 'lulu-resting' : 'lulu') ?? '')
+          : (pickLine(mood === 'asleep' ? 'lulu-asleep' : mood === 'sitting' ? 'lulu-sitting' : 'lulu') ?? '')
     luluSeen.current += 1
 
     setElliSays((prev) => ({ id: (prev?.id ?? 0) + 1, text }))

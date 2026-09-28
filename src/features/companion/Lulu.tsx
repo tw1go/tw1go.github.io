@@ -108,11 +108,20 @@ const LOOPS: Record<Action, number | 'infinite'> = {
 }
 
 /**
- * States where she is down and staying down. Clicking her in one of
- * these gets a different remark out of Elli — the rising animations are
- * excluded, since by then she is already getting up.
+ * What she is up to, as far as Elli is concerned when someone clicks her.
+ * Sat down and fast asleep get different remarks — a sitting cat is
+ * wide awake and judging you, not napping. The rising animations count
+ * as up: by then she is already getting to her feet.
  */
-const RESTING = new Set<Action>(['sit', 'sitting', 'sleep', 'sleeping'])
+export type LuluMood = 'up' | 'sitting' | 'asleep'
+
+const MOOD: Partial<Record<Action, LuluMood>> = {
+  sit: 'sitting',
+  sitting: 'sitting',
+  sleep: 'asleep',
+  sleeping: 'asleep',
+}
+
 
 interface Pose {
   /** Bumped on every change so the sprite remounts and restarts. */
@@ -266,7 +275,7 @@ export interface LuluControls {
 }
 
 interface LuluProps {
-  onPet?: (resting: boolean) => void
+  onPet?: (mood: LuluMood) => void
   /** Every move she makes, for Wonwuu to check her line of sight. */
   onMove?: (track: Track) => void
   /** Lets the room start a chase. */
@@ -338,7 +347,7 @@ export function Lulu({ onPet, onMove, controls, onBack }: LuluProps) {
       ref={ref}
       type="button"
       className="lulu"
-      onClick={() => onPet?.(RESTING.has(pose.action))}
+      onClick={() => onPet?.(MOOD[pose.action] ?? 'up')}
       aria-label="Lulu, twigo's cat"
       data-action={pose.action}
       data-jump={pose.action === 'jump' ? pose.surface : undefined}

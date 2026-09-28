@@ -48,8 +48,17 @@ export const DIALOG_LINES: Record<string, string[]> = {
   ],
   /* Used instead of the pool above when Lulu is sat down or asleep, so
      her ignoring you reads as deliberate rather than as nothing having
-     happened. */
-  'lulu-resting': [
+     happened. Sat down: awake, upright, and watching you. */
+  'lulu-sitting': [
+    'She is sitting like that on purpose. It means she is in charge.',
+    'That is her loaf position. Do not interrupt the loaf.',
+    'She is staring at you. That is a test. You are failing it.',
+    "Tail's flicking. That means stop. Or go on. It means whatever she wants.",
+    'She sat down to think about treats. She is always thinking about treats.',
+    'Sitting, watching the room. Security guard. Unpaid. Very strict.',
+  ],
+  /* Lying down or fast asleep. */
+  'lulu-asleep': [
     "She's asleep. I would not.",
     'Nineteen hours a day. This is hour six.',
     'You can pet her. Once. Carefully.',
