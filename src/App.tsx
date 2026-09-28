@@ -51,10 +51,11 @@ interface Dialog {
 const PESTER_MS = 1500
 
 function App() {
-  const play = useCharacterAnimation()
   const sceneScale = useSceneScale()
-  // What twigo is playing on Discord right now, if anything.
+  // What twigo is playing on Discord right now, if anything. The
+  // character reacts to it, so it is read first.
   const game = useDiscordGame()
+  const play = useCharacterAnimation(game?.name ?? null)
   // Lifted out of NowPlaying so the strip and the floating notes share a
   // single poll — calling the hook in both would double the request rate.
   const nowPlaying = useNowPlaying()
@@ -284,7 +285,7 @@ function App() {
       </div>
 
       {/* Light spill from the monitors — the only thing on in the room. */}
-      <div className="scene__glow" aria-hidden="true" />
+      <div className="scene__glow" data-gaming={game ? true : undefined} aria-hidden="true" />
       <div className="scene__floor" aria-hidden="true" />
 
       <div className="scene__stage" ref={stageRef}>

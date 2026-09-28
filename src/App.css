@@ -176,6 +176,13 @@ html[data-flash][data-curtains='2'] .scene::before {
   animation: room-breathe 7s ease-in-out infinite;
 }
 
+/* In a game the monitors are working harder: the spill is brighter and
+   breathes quicker. */
+.scene__glow[data-gaming] {
+  --glow-strength: 1.35;
+  animation-duration: 3.2s;
+}
+
 /* Reads --glow-strength rather than using fixed values: the glow is
    animated, so a plain `opacity` rule elsewhere could never win against
    it. Daylight turns the strength down instead. */

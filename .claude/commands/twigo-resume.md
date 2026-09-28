@@ -1,7 +1,3 @@
----
-description: Load full context for the twigo pixel-art hero site and continue work
----
-
 You are resuming work on **twigo portfolio**. Read this briefing, confirm the
 environment, then ask what to work on (or act on `$ARGUMENTS` if given).
 
@@ -9,36 +5,37 @@ environment, then ask what to work on (or act on `$ARGUMENTS` if given).
 
 ## 1. What this is
 
-A **gaming portfolio for "twigo"** — deliberately *not* a multi-section website.
-It is a **single hero screen**: one pixel-art character at a desk, centred in a
-dark room, with animations that play on their own. No scrolling, no nav.
+A **gaming portfolio for "twigo"** — deliberately *not* a multi-section site.
+One screen: a pixel-art character at a desk in a dark room, full of things
+that happen on their own and easter eggs to find. No scrolling, no nav.
 
-- Style: pixel art throughout. Hard edges, no blur, `image-rendering: pixelated`.
-- Brand palette (in `src/styles/variables.css`, everything derives from it):
-  `#7C2AE8` violet · `#D946EF` magenta · `#A3E635` lime · `#22C55E` green · `#111827` ink
-- Type: self-hosted `Minecraft.ttf` (`src/styles/fonts.css`), no webfont CDN.
-- Stack: Vite 8 + React 19 + TypeScript 6, `oxlint`. **Not a git repo** — don't
-  assume `git` works; offer `git init` if the user wants version control.
+- Pixel art throughout: hard edges, no blur, `image-rendering: pixelated`.
+- Palette in `src/styles/variables.css`: `#7C2AE8` violet · `#D946EF` magenta ·
+  `#A3E635` lime · `#22C55E` green · `#111827` ink.
+- Type: self-hosted `Minecraft.ttf` (`src/styles/fonts.css`).
+- Stack: Vite 8 + React 19 + TypeScript 6, `oxlint`.
+- **Git repo**, `master` → GitHub Pages at `tw1go.github.io` via
+  `.github/workflows/deploy.yml` on every push. The user pushes to `master`
+  directly and asks for it explicitly ("push the changes").
+- Spotify now-playing runs through a Vercel function (`api/now-playing.ts`,
+  secrets in Vercel env) — see README.
+
+Many characters are the user's real friends; their lore lives in the line
+pools in `src/features/dialog/lines.ts`. Keep their voices consistent.
 
 ---
 
 ## 2. Environment — check this FIRST
 
-The user's default Node is **22.4.1**, but Vite 8's bundler (rolldown) requires
-**Node ≥22.12**. Below that, npm silently skips the platform binary as an
-optional dep and the build dies with `Cannot find module @rolldown/binding-*`.
-
-Node 22.23.2 is installed via nvm and `.nvmrc` pins the project. **Every shell
-command that runs npm must activate it first:**
+Default Node is 22.4.1; Vite 8 (rolldown) needs **≥ 22.12**. Every npm command:
 
 ```bash
 source ~/.nvm/nvm.sh >/dev/null 2>&1 && nvm use 22 >/dev/null && npm run build
 ```
 
-The user's global nvm default was deliberately left untouched.
-
-Verify after every change: `npm run build` (includes `tsc -b`) **and**
-`npm run lint`. Both must be clean.
+Verify after every change: `npm run build` (runs `tsc -b`) **and**
+`npm run lint`. Both must be clean — oxlint flags `setState` in effects,
+writing to props/refs passed in, and bad effect deps.
 
 ---
 
@@ -46,212 +43,141 @@ Verify after every change: `npm run build` (includes `tsc -b`) **and**
 
 ```
 src/
-├── App.tsx                      scene composition + dialog latch
-├── App.css                      scene, floor, sign, dialog layer
-├── index.css                    reset, black room, scanlines, vignette
-├── components/Sprite.tsx        renders one sheet, drives CSS vars
-├── hooks/useCharacterAnimation  idle ↔ random action scheduler
-├── sprites/
-│   ├── manifest.ts              per-sheet geometry + timing + playDuration()
-│   └── preload.ts               fetch+decode all sheets on mount
-├── styles/
-│   ├── variables.css            palette, wood, pixel grid, fonts
-│   ├── sprite.css               the sprite-sheet animation engine
-│   └── fonts.css                @font-face for Minecraft.ttf
+├── App.tsx                 composition, all reveal/dialog state, room light
+├── App.css                 scene layers, floor, sign, vignette (.scene::after)
+├── components/             Sprite (sheet renderer), WallWindow (curtain + slots)
+├── hooks/
+│   ├── useCharacterAnimation   idle ↔ actions; reacts to Discord game
+│   └── useSceneScale           whole-number scale fitting width AND height
+├── sprites/manifest.ts     EVERY sheet: geometry, slices, timing
+├── styles/                 variables, sprite engine, fonts, wall-window
 └── features/
-    ├── dialog/                  speech bubble (lines, typewriter, component)
-    └── spotify/                 STUB — types + hook + corner readout
+    ├── companion/   Elli (desk bot, talks), Lulu (cat; chases Wonwuu)
+    ├── dialog/      speech bubble, bottom InteractionBox, lines.ts (ALL copy)
+    ├── pumpkin/     Biiko Kalabasa — golden pumpkin behind left curtain (curse)
+    ├── fairy/       Fairy Cha — 7.16%/10s flyby, dust canvas (blessing)
+    ├── wonwuu/      rat on the floor (trade); also Exclaim marks, track.ts
+    ├── jords-fork/  ritual circle + hovering trident (prophecy)
+    ├── pittuki/     house lizard on the wall (therapy session)
+    ├── croakyangs/  frog behind right curtain, sings (serenade)
+    ├── showcase/    jukebox → artist record rack
+    ├── spotify/     now-playing strip + music notes
+    ├── sky/         time of day + Open-Meteo weather in the windows
+    ├── discord/     Lanyard presence → "Currently playing" tag over PC
+    └── rotate/      portrait-phone "turn sideways" prompt
+scripts/downsample-sheet.mjs   redraws a fine sheet onto a coarser pixel grid
+scripts/cdp.mjs                real-time headless Chrome driver for checks (§7)
 ```
 
 ---
 
-## 4. The scene's coordinate system
+## 4. Coordinates and scale
 
-Everything is anchored to two numbers on `.scene`, and the sprite frame is
-positioned from them. **Do not reintroduce viewport-centring** — the sprite
-frame is mostly empty space, so centring it made raising the scale push the
-ground line off the bottom of the screen.
+Everything hangs off `.scene`: `--scene-scale` (set **from JS** by
+`useSceneScale`: `floor(min(w/248, h/170))`, clamped 1–10; the CSS `5` is a
+first-paint fallback), `--scene-pixel`, `--frame` (256 × pixel), `--horizon`
+(80dvh), `--stage-top`. Layers (`scene__stage`, `__props`, `__pets`,
+`__dialog`, `__hearts`, `__ritual`, `__wall`…) all mirror the 256px frame
+box, so positions are **percent of the character's frame**, not viewport.
 
-| var | value | meaning |
-|---|---|---|
-| `--scene-scale` | 5 | the pixel grid; sprite, planks and glows are all multiples of it |
-| `--scene-pixel` | `scale * 1px` | one art pixel on screen |
-| `--frame` | `256 * --scene-pixel` | the sprite frame box |
-| `--horizon` | `80dvh` | where the floor line sits in the viewport |
-| `--character-depth` | `--scene-pixel * 8` | how far in front of the horizon the feet land |
-| `--stage-top` | derived | `horizon + depth - frame * 0.6836` |
+Measured art facts: character art rows 87–174, cols 34–220; PC tower cols
+188–221 top row 92; right window starts at 78.4% of the frame.
 
-`0.6836` is measured, not guessed: the lowest opaque row of the art (chair
-wheels) is **row 174 of 256**; the top is **row 87** (34%); art spans columns
-**34–220** (188 of 256 wide). Re-measure with a canvas page if sheets change.
+**Never hard-code a pixel size on room art** — use `calc(var(--scene-scale) *
+k)`. A fixed `--sprite-scale: 2` on the curtains swamped phones.
 
-`.scene__glow` and `.scene__dialog` both mirror that same box so they track the
-character rather than the viewport.
-
-Scale ladder (whole numbers only — half pixels break the grid):
-`5` → `4` ≤1100px → `3` ≤900px → `2` ≤700px → `1` ≤420px.
+Sprite scales in use: room furniture/wall 0.4×, animals 0.6×, Pittuki 0.4×.
+Fine source sheets get redrawn with `scripts/downsample-sheet.mjs` into a
+`-pixel.png` beside the original (Wonwuu 128→28, fork 128→48, lizard and
+frog 64→32); reveals use the original high-res sheet.
 
 ---
 
-## 5. Sprite engine (`src/styles/sprite.css`)
+## 5. Sprite engine
 
-Based on <https://leanrada.com/notes/css-sprite-sheets/> — one element,
-`background-position`, `steps()`. The article animates a single horizontal
-strip; **our sheets are 2D grids with partially-filled last rows**, so instead
-of animating `background-position` directly it animates one `@property`-
-registered `<integer>` (`--sprite-frame`) and derives the offset:
-
-```
-x = mod(frame, cols) * frameW      y = round(down, frame / cols, 1) * frameH
-```
-
-`steps(n)` still does the real work — the index lands exactly on 0…n-1 and
-blank trailing cells are never visited. Adding a sheet = one manifest entry.
-
-| sheet | grid | frames | duration |
-|---|---|---|---|
-| `idle-static` | 1×1 | 1 | — |
-| `idle` | 3×3 | 8 | 1150ms |
-| `random-movement` | 3×3 | 8 | 1265ms |
-| `drinking` | 4×4 | 14 | 1610ms ×2 (ping-pong) |
-
-**Ping-pong**: `drinking` ends mid-motion, so `pingPong: true` sets
-`animation-direction: alternate`, which reverses the step timing along with the
-keyframes and lands back on frame 0 — the pose idle starts from. One logical
-"play" is therefore **two** CSS iterations; `playDuration()` reports real
-wall-clock length and the scheduler must use it, not `duration`.
-
-`preload.ts` fetches and `decode()`s every sheet on mount. Without it the first
-switch to an action decodes a 1024×1024 PNG on the frame it appears — a visible
-stutter.
+`src/styles/sprite.css`: one `@property --sprite-frame` integer, `steps()`,
+`x = mod(frame, cols)`, `y = floor(frame/cols)`. Manifest supports
+`firstFrame` + `rows` (slices of one sheet), `pingPong`, `reverse`,
+`iterations`. `playDuration()` is the real wall-clock length. `key` the
+Sprite on each change so the animation restarts.
 
 ---
 
-## 6. Non-obvious decisions (these get re-broken if forgotten)
+## 6. Hard-won rules (these get re-broken)
 
-- **Registered custom properties are what make colour/number animation work.**
-  An unregistered custom property is an uninterpolated token stream and will
-  *jump* between keyframes. `--glow-primary` / `--glow-secondary` are
-  `@property … syntax:'<color>'` so the room can fade violet↔green over 24s;
-  gradients consume them via `color-mix(…, transparent)`.
-- **Glow alpha and blur fight each other.** A blur spreads a colour over its
-  whole radius, so a faint colour at a large radius dilutes to nothing. The
-  sign's widest spill layer is ~52% green, not 8%. Blur does the falloff; the
-  colour stays near-opaque.
-- **The sign's glow must follow the glyphs.** It is built only from blurred
-  `text-shadow` copies. A radial gradient behind the text always reads as a
-  circle on the wall, at any softness.
-- **Floor perspective is a fan, not a tilt.** Seams are a
-  `repeating-conic-gradient`, so they genuinely converge. `--seam-focus: -70%`
-  holds the vanishing point *above* the floor's top edge — on the edge itself
-  every seam pinched to one visible point and read as an infinite corridor.
-  Cross-joints use hand-placed stops that bunch toward the horizon; equal
-  spacing flattens the plane straight back out.
-- **The floor cannot sit on the pixel grid** — a receding plane has no constant
-  pixel size. Kept shallow and low-contrast on purpose.
-- **Dialog needs its own layer.** `.scene__dialog` (`z-index: 10`) is a sibling
-  of `.scene__stage`. Inside the stage the bubble was trapped in that element's
-  stacking context, so the sign and now-playing strip (both `z-index: 1`, later
-  in the DOM) painted over it. Raising the bubble's own z-index cannot fix that.
-- **`--dlg-anchor` is a length, not a percentage.** As a percentage the tail
-  drifted with line length and landed inside the corner radius on short lines.
-  It sets the box shift, the tail position and the pop origin together.
-- **The bubble outlives its play.** It keeps un-typing after the character
-  returns to idle, so it is latched into `App` state and clears itself via
-  `onDone` — it cannot be derived from `play`.
-- **The erase is scheduled from one fixed time**, `max(typing end + 600ms,
-  animation length)`. That guarantees typing finished first, so the type and
-  erase intervals can never overlap and there is no race to guard.
-- React: prefer **render-phase state adjustment** over `setState` in an effect —
-  oxlint flags the latter (`react(set-state-in-effect)`).
+- **Reveal exits need their own keyframes.** Swapping `animation-direction`
+  on a finished animation does not restart it; `reverse forwards` jumps to
+  invisible. Reveal text boxes use `interaction-drop` (no −50% X).
+- **Stacking contexts.** Anything that must paint/receive clicks above a
+  layer needs its own layer, not a bigger z-index. The window frame has
+  `isolation: isolate` — without it the glass swallowed Croakyangs' clicks.
+- **Layers with `pointer-events: none`**: clickable children must opt back in
+  (Pittuki was unclickable for this reason).
+- **Speed from stride.** Walkers derive speed = stride / loop duration or
+  feet skate (Wonwuu, Pittuki, Lulu's chase).
+- **No rotating pixel art.** Pittuki gets 4 headings from `scale(±1, ±1)`
+  flips only; the fork hovers with a stepped bob + drift, not a spin.
+- **Glow follows glyphs** (text-shadow / drop-shadow), never a radial blob.
+- **Registered `@property`** for any animated colour/number.
+- Render-phase state latching instead of `setState` in effects.
+- Console triggers exist for everything — keep adding them:
+  `summonFairyCha()`, `summonWonwuu({from})`, `summonJordsFork()`,
+  `summonPittuki()`, `setTime(h|'dusk')`, `setWeather('storm')`,
+  `setSky({...})`, `resetSky()`, `setGame('Valorant')` / `setGame(null)`.
+
+External services (all free, keyless, CORS `*`): Open-Meteo forecast +
+geocoder (location from timezone, cached 20 min in localStorage); Lanyard
+WebSocket for Discord presence, user ID `734942189984940063` in
+`features/discord/presence.ts` (type 0 activities only).
 
 ---
 
-## 7. Verifying visual work — harness limits (hard-won)
+## 7. Verifying — harness facts
 
-There is no Playwright. Screenshots come from headless Chrome:
+No Playwright. Two tools:
 
-```bash
-SP=<scratchpad>
-(npm run preview -- --port 4173 &) ; sleep 2
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
-  --disable-gpu --hide-scrollbars --virtual-time-budget=3000 \
-  --window-size=1440,900 --screenshot="$SP/shot.png" http://localhost:4173/
-sips -c 200 560 --cropOffset 160 620 "$SP/shot.png" --out "$SP/c.png"   # zoom in
-sips -z 330 920 "$SP/c.png" --out "$SP/big.png"
-```
+- **Real time, scripted:** `scripts/cdp.mjs`, which launches headless
+  Chrome with `--remote-debugging-port`, then runs steps: `wait`, `eval`,
+  `probe` (awaits promises), `shot`, `mouse` (real `Input.dispatchMouseEvent`
+  at an element's centre), `tap` (touch). Env: `VP=844x390`, `MOBILE=1`
+  (touch + coarse pointer), `PRELOAD=<js>` (runs before page scripts — e.g.
+  to wrap `WebSocket` and log traffic).
+- `vite preview --port 4173` for the built site.
 
-**Three traps, all confirmed:**
+Traps, all confirmed:
+1. `--virtual-time-budget` suppresses animation events and doesn't advance
+   compositor animations or rAF reliably — use the real-time CDP driver.
+2. `--disable-gpu` headless screenshots **do not capture canvas** (Fairy
+   Cha's dust and fireflies). Drop the flag, as `scripts/cdp.mjs` does.
+3. **`element.click()` lies** — it skips hit-testing. Always test clicks with
+   real mouse/touch events at the element's coordinates and read
+   `document.elementsFromPoint` to see what is on top.
+4. WebSockets don't appear in `performance.getEntriesByType('resource')`.
+5. Headless Chrome sometimes hangs; wrap with `perl -e 'alarm 40; exec @ARGV'`
+   and use a fresh `--user-data-dir` per run.
+6. For rare events, temporarily shorten timers / force states, test, and
+   **restore from a backup copy**; say so in the report.
 
-1. `--virtual-time-budget` **suppresses animation events entirely** —
-   `animationiteration` / `animationend` never fire, even for a plain `opacity`
-   animation. Do not conclude event-driven code is broken from this.
-2. It also **does not advance compositor animations** (`opacity`, `transform`).
-   Those render pinned at their start frame, so an element animating in from
-   `opacity: 0` looks invisible. **Main-thread animations** (custom properties,
-   `color`, `text-shadow`) *do* advance and are observable.
-   → To check an element's *appearance*, temporarily set `animation: none`,
-   screenshot, then restore.
-3. `--dump-dom` fires right after load, before any animation iteration. It is
-   good for *state* (`grep -o 'aria-label="[^"]*"'` tells you which sprite and
-   which dialog line are mounted) but not for timing.
-
-Idle occupies ~80% of the timeline, so random sampling rarely catches an action.
-**Force a deterministic schedule** by temporarily setting
-`IDLE_LOOPS_MIN/MAX = 1` and trimming `ACTIONS` to one entry — always back the
-file up first and restore it afterwards:
-
-```bash
-cp src/hooks/useCharacterAnimation.ts "$SP/hook.bak"   # ... test ...
-cp "$SP/hook.bak" src/hooks/useCharacterAnimation.ts && npm run build
-```
-
-Headless Chrome reports `prefers-reduced-motion: reduce` = **false**, so
-reduced-motion blocks are not the explanation when something looks static.
+Check several viewports (2560×1440, 1920×1080, 1440×900, 1024×768, 844×390
+landscape phone, 390×844 portrait) for anything layout-related.
 
 ---
 
-## 8. Tunable knobs
+## 8. How the user works
 
-| want | change |
-|---|---|
-| character bigger/smaller | `--scene-scale` on `.scene` + the breakpoint ladder |
-| character up/down | `--character-depth` (floor stays put) |
-| floor higher/lower | `--horizon` |
-| floor depth / plank count | `--seam-focus`, `--seam-period`, `--seam-width` |
-| board-end spacing | the stop list in the "Board ends" gradient |
-| wood tone | `--wood-base/-plank/-seam` in `variables.css` |
-| sign size | `font-size` + `--sign-px` on `.scene__wordmark` |
-| sign glow strength | `--sign-glow`…`--sign-spill-far` alphas (raise alpha before radius) |
-| room colour cycle | `glow-cycle` keyframes + the `24s` on `.scene` |
-| bubble shape/offset | `--dlg-px`, `--dlg-anchor`, `border-radius`, `padding` |
-| animation speed | `duration` per sheet in `manifest.ts` |
+Short, iterative, visual requests, often several at once mid-task ("make it
+smaller", "lower", "10% not 90%"). Expects screenshots, not assertions, and
+plain statements when something couldn't be verified. Fix root causes and
+briefly explain the non-obvious ones. Enjoys the characters' writing — make
+lines specific and funny, in each friend's voice.
 
 ---
 
-## 9. What's next
+## 9. Open ideas
 
-1. **Bottom interaction dialog box** — the planned second dialog: a large box at
-   the bottom of the screen shown when the user interacts with the sprite. Put
-   it in `src/features/dialog/` and render it inside `.scene__dialog`.
-   `DIALOG_LINES` is already keyed by sprite name, so it needs a new key, not a
-   refactor. Note the layer is `pointer-events: none` — an interactive box must
-   opt back in on its own element.
-2. **Spotify API** — `features/spotify/` has the target type, a stub hook
-   returning `offline`, and a live corner readout. Swap the stub body for a
-   fetch against **your own endpoint**, never `api.spotify.com` directly: the
-   refresh token cannot live in the browser.
-
-Known loose ends: `public/icons.svg` is an unreferenced Vite-template file kept
-in case socials are wanted. The scene has a lot of black headroom on tall narrow
-screens (fixed `80dvh` horizon) — could be made breakpoint-dependent.
-
----
-
-## 10. How the user works
-
-Short, iterative visual requests ("make it bigger", "more glow", "closer to the
-character"). They expect you to **verify with a screenshot** rather than assert,
-and to **say plainly when the harness cannot verify something** instead of
-claiming it works. Fix root causes, not symptoms, and explain the counter-
-intuitive ones briefly — they engage with the reasoning and ask good follow-ups.
+- Room glow following Discord online/idle/DND status; Elli commenting on
+  play time.
+- Snow weather (currently maps to cloudy); pixel ♪ glyph for Croakyangs.
+- Upright tablets / "show anyway" portrait: lots of black above the room.
+- Performance pass on a low-end phone (rain, dust, animals all at once).
+- Confirm how Discord names Teamfight Tactics (may report as League).

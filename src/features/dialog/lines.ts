@@ -352,3 +352,116 @@ export function pickCroakSong(): string {
   // The song on a line of its own, so it reads as sung rather than said.
   return `${pick(CROAK_OPENERS)}\n♪ ${pick(CROAK_SONGS)} ♪\n${pick(CROAK_CLOSERS)}`
 }
+
+/*
+ * twigo while a game is running on his Discord. `{game}` is filled in
+ * with its name. Kept short: these share the speech bubble with the
+ * drinking lines, above his head, and a long one would bury the room.
+ */
+const GAME_START = [
+  'Booting up {game}. Wish me luck.',
+  'Okay. {game}. Just one round.',
+  "Loading into {game}. Don't talk to me.",
+  '{game} time. Hydrated? No. Ready? Yes.',
+]
+
+const GAME_END = [
+  'GG. {game} is done with me.',
+  "That's enough {game} for now. Probably.",
+  'Logging off {game}. My back thanks me.',
+  "{game} closed. I'll be back. I'm always back.",
+]
+
+const GAME_CHATTER = [
+  'Locked in.',
+  'One more round. Then I stop. Definitely.',
+  'Shh. {game} is getting good.',
+  'Was that lag? That was lag.',
+  "I'm not tilted. You're tilted.",
+  'Focus mode: on. Snacks: gone.',
+  "Still in {game}. Don't wait up.",
+  'Clip it. Somebody clip that.',
+]
+
+/*
+ * The games twigo actually plays get their own lines. Keyed by a
+ * normalised name — lower case, letters and digits only — so however
+ * Discord styles it ("VALORANT", "Dota 2", "PEAK") it still matches.
+ */
+const GAME_SPECIFIC: Record<string, string[]> = {
+  phasmophobia: [
+    'Is it cold in here, or is that the ghost?',
+    'The EMF just hit five. I am not okay.',
+    "I'm not scared. I'm just hiding in the van.",
+    'Spirit box says hi. I did not say hi back.',
+  ],
+  apexlegends: [
+    'Third party. Of course it is a third party.',
+    'Champion squad? That is us. Hopefully.',
+    'Hot drop. Instant regret.',
+    'One shot. They were ONE shot.',
+  ],
+  valorant: [
+    'One tap. Or one miss. Mostly the miss.',
+    'Eco round again. Classic.',
+    "Planting the spike. Nobody push. Please don't push.",
+    'Clutch or kick. No pressure.',
+  ],
+  leagueoflegends: [
+    'Where was the jungle? Where is the jungle ever?',
+    'Ganked again. Bot lane is a war crime.',
+    'Typing /ff at fifteen. Respectfully.',
+    'Just one more game. League said, "no".',
+  ],
+  crystalofatlan: [
+    'Combo into combo into combo. Beautiful.',
+    'Dungeon run. Wish me loot.',
+    'Magitech is just magic with extra steps.',
+  ],
+  aniimo: [
+    'Got to catch that one. Look at its little face.',
+    'My team is adorable and deeply unserious.',
+    'One more Aniimo. Then bed. Then one more.',
+  ],
+  peak: [
+    'Stamina gone. Hands gone. Friends gone.',
+    'Nobody look down. I looked down.',
+    'We are going to reach the top. Probably.',
+  ],
+  dota2: [
+    'Forty minutes in. Forty more to go.',
+    'Somebody take Roshan. Anybody. Please.',
+    "Denied. Don't ask me what, just denied.",
+  ],
+  deadlock: [
+    'Farming souls like a responsible adult.',
+    'Lane is mine. The lane is everyone\'s, actually.',
+    'Zipline, zipline, dead.',
+  ],
+  teamfighttactics: [
+    'Rolling down. Again. For the last time. Again.',
+    'Top four is a win. Top four is a WIN.',
+    'Augments have forsaken me.',
+    "Hitting the three-star. Don't breathe.",
+  ],
+  minecraft: ['Just one more block. Then bed.', 'Heard a creeper. Did not see it.'],
+}
+
+const gameKey = (game: string) => game.toLowerCase().replace(/[^a-z0-9]/g, '')
+
+const fill = (line: string, game: string) => line.replaceAll('{game}', game)
+
+export function gameStartLine(game: string): string {
+  return fill(pick(GAME_START), game)
+}
+
+export function gameEndLine(game: string): string {
+  return fill(pick(GAME_END), game)
+}
+
+export function gameChatterLine(game: string): string {
+  const own = GAME_SPECIFIC[gameKey(game)] ?? []
+  // Half the time from the game's own lines, if it has any.
+  const pool = own.length && Math.random() < 0.5 ? own : GAME_CHATTER
+  return fill(pick(pool), game)
+}
