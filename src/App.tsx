@@ -38,6 +38,9 @@ import { useSceneScale } from './hooks/useSceneScale'
 import { RotatePrompt } from './features/rotate/RotatePrompt'
 import { GameTag } from './features/discord/GameTag'
 import { useDiscordGame } from './features/discord/presence'
+import { KowenBoard } from './features/kowens/KowenBoard'
+import { KowenFound } from './features/kowens/KowenFound'
+import { useKowenFinds } from './features/kowens/useKowenFinds'
 import { playDuration } from './sprites/manifest'
 import './App.css'
 
@@ -82,6 +85,14 @@ function App() {
   // restarts the crawl.
   const [elliSays, setElliSays] = useState<{ id: number; text: string } | null>(null)
 
+  // Every click on a character has a chance of turning up a Kowen — rolled
+  // by twigo-bot, not here. Called from each handler below.
+  const kowenFinds = useKowenFinds()
+  const { tryFind, setFairyAround } = kowenFinds
+  // Fairy Cha in the room — flying past, or her blessing open — makes
+  // every find likelier.
+  const [fairyFlying, setFairyFlying] = useState(false)
+
   // Wonwuu's reveal, shown when he is clicked. It draws its own trade.
   const [ratCaughtOpen, setRatCaughtOpen] = useState(false)
   const ratCaught = useCallback(() => {
@@ -89,7 +100,8 @@ function App() {
     // left waiting underneath it.
     setElliSays(null)
     setRatCaughtOpen(true)
-  }, [])
+    tryFind('wonwuu')
+  }, [tryFind])
   const closeRat = useCallback(() => setRatCaughtOpen(false), [])
 
   // Jord's Fork's prophecy, shown when the fork is clicked.
@@ -97,7 +109,8 @@ function App() {
   const forkCaught = useCallback(() => {
     setElliSays(null)
     setForkOpen(true)
-  }, [])
+    tryFind('jords-fork')
+  }, [tryFind])
   const closeFork = useCallback(() => setForkOpen(false), [])
 
   // Dr. Pittuki's session, shown when the lizard is clicked.
@@ -105,7 +118,8 @@ function App() {
   const lizardCaught = useCallback(() => {
     setElliSays(null)
     setLizardOpen(true)
-  }, [])
+    tryFind('pittuki')
+  }, [tryFind])
   const closeLizard = useCallback(() => setLizardOpen(false), [])
 
   // Croakyangs lives in the right-hand window. One song clock for both
@@ -115,7 +129,8 @@ function App() {
   const frogFound = useCallback(() => {
     setElliSays(null)
     setSerenade(true)
-  }, [])
+    tryFind('croakyangs')
+  }, [tryFind])
   const closeSerenade = useCallback(() => setSerenade(false), [])
 
   // Counts clicks for the life of the page, so it doubles as the remount
@@ -131,11 +146,15 @@ function App() {
       // She introduces herself once, then falls back to small talk.
       text: talks === 0 ? ELLI_INTRO : (pickLine('elli/idle') ?? ''),
     })
-  }, [talks])
+    tryFind('elli')
+  }, [talks, tryFind])
   const closeElli = useCallback(() => setElliSays(null), [])
 
   const [pumpkin, setPumpkin] = useState(false)
-  const foundPumpkin = useCallback(() => setPumpkin(true), [])
+  const foundPumpkin = useCallback(() => {
+    setPumpkin(true)
+    tryFind('pumpkin')
+  }, [tryFind])
   const closePumpkin = useCallback(() => setPumpkin(false), [])
 
   // The jukebox's record rack.
@@ -149,8 +168,12 @@ function App() {
   const stageRef = useRef<HTMLDivElement>(null)
   const [fairy, setFairy] = useState(false)
   const [smitten, setSmitten] = useState(0)
-  const caughtFairy = useCallback(() => setFairy(true), [])
+  const caughtFairy = useCallback(() => {
+    setFairy(true)
+    tryFind('fairy-cha')
+  }, [tryFind])
   const closeFairy = useCallback(() => setFairy(false), [])
+  useEffect(() => setFairyAround(fairyFlying || fairy), [fairyFlying, fairy, setFairyAround])
   const fairyPassed = useCallback(() => setSmitten((count) => count + 1), [])
   const heartsDone = useCallback(() => setSmitten(0), [])
 
@@ -236,7 +259,8 @@ function App() {
     luluSeen.current += 1
 
     setElliSays((prev) => ({ id: (prev?.id ?? 0) + 1, text }))
-  }, [])
+    tryFind('lulu')
+  }, [tryFind])
 
   return (
     <main
@@ -250,6 +274,7 @@ function App() {
             him: that is what he hides behind. */}
         <Pittuki wonwuu={ratTrack} onGlare={lizardGlared} onCaught={lizardCaught} />
         <Sprite name="props/aircon" className="scene__aircon" />
+        <KowenBoard />
 
 
         <WallWindow
@@ -396,12 +421,15 @@ function App() {
         resting={fairy || pumpkin || showcase || ratCaughtOpen || forkOpen || lizardOpen || serenade}
         onPass={fairyPassed}
         onCaught={caughtFairy}
+        onFlying={setFairyFlying}
       />
       {fairy && <FairyReveal onClose={closeFairy} />}
       {ratCaughtOpen && <WonwuuReveal onClose={closeRat} />}
       {forkOpen && <ForkReveal onClose={closeFork} />}
       {lizardOpen && <PittukiReveal onClose={closeLizard} />}
       {serenade && <SerenadeReveal onClose={closeSerenade} />}
+
+      {kowenFinds.find && <KowenFound find={kowenFinds.find} onClose={kowenFinds.close} />}
 
       <RotatePrompt />
 

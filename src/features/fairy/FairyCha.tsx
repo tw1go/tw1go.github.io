@@ -40,6 +40,8 @@ interface FairyChaProps {
   onPass: () => void
   /** Someone caught her. */
   onCaught: () => void
+  /** She has started or finished crossing the room. */
+  onFlying?: (flying: boolean) => void
 }
 
 const reducedMotion = () =>
@@ -57,7 +59,7 @@ const reducedMotion = () =>
  * for one transform would be pure overhead, and a CSS path could not
  * report where she is to the dust or to the heart trigger.
  */
-export function FairyCha({ anchor, resting = false, onPass, onCaught }: FairyChaProps) {
+export function FairyCha({ anchor, resting = false, onPass, onCaught, onFlying }: FairyChaProps) {
   const [flight, setFlight] = useState<Flight | null>(null)
   const flyerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -69,10 +71,17 @@ export function FairyCha({ anchor, resting = false, onPass, onCaught }: FairyCha
   // calls the latest handler without restarting when App re-renders.
   const onPassRef = useRef(onPass)
   const onCaughtRef = useRef(onCaught)
+  const onFlyingRef = useRef(onFlying)
   useEffect(() => {
     onPassRef.current = onPass
     onCaughtRef.current = onCaught
-  }, [onPass, onCaught])
+    onFlyingRef.current = onFlying
+  }, [onPass, onCaught, onFlying])
+
+  const flying = flight !== null
+  useEffect(() => {
+    onFlyingRef.current?.(flying)
+  }, [flying])
 
   useEffect(() => {
     const canvas = canvasRef.current

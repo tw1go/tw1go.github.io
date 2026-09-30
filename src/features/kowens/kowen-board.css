@@ -1,0 +1,209 @@
+/* The board, on the wall above the jukebox. In the wall layer, which
+   mirrors the 256px frame: the left window ends at 39% down and the
+   jukebox's lid is at about 51%, so it hangs in the gap between them.
+   Sized in art pixels, so it is part of the room at every scale. */
+.kowen-board {
+  --kb-px: var(--scene-pixel);
+
+  position: absolute;
+  left: 2.2%;
+  top: 41%;
+  width: calc(var(--kb-px) * 27);
+  box-sizing: border-box;
+  padding: calc(var(--kb-px) * 1.2) calc(var(--kb-px) * 1.5);
+
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--kb-px) * 0.4);
+
+  /* A dark chalkboard in a wooden frame. */
+  background: #1a2019;
+  border: var(--kb-px) solid #5b3a24;
+  box-shadow:
+    inset 0 0 0 calc(var(--kb-px) * 0.4) #2b3329,
+    var(--kb-px) var(--kb-px) 0 0 rgb(0 0 0 / 0.55);
+
+  font-family: var(--font-body);
+  font-size: calc(var(--kb-px) * 1.9);
+  line-height: 1.15;
+  color: #e7efe2;
+  text-align: left;
+
+  /* The wall layer is click-through; the board opts back in. */
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kowen-board:focus-visible {
+  outline: var(--px) solid var(--twigo-lime);
+  outline-offset: var(--px);
+}
+
+.kowen-board__title {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--kb-px) * 0.8);
+  font-size: calc(var(--kb-px) * 2.1);
+  letter-spacing: 0.08em;
+  color: #fde68a;
+}
+
+/* The coin is drawn much finer than the room, and shrinks a long way to
+   sit on the board, so it is left to smooth rather than being pixelated
+   into noise. */
+.kowen-board__coin {
+  width: calc(var(--kb-px) * 3);
+  height: calc(var(--kb-px) * 3);
+  flex: none;
+}
+
+.kowen-board__row {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(var(--kb-px) * 1);
+  min-width: 0;
+}
+
+.kowen-board__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kowen-board__score {
+  flex: none;
+  color: var(--twigo-lime);
+}
+
+/* ── The full top ten ──────────────────────────────────────── */
+
+.kowen-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  padding: var(--px-6);
+  background: rgb(0 0 0 / 0.72);
+  cursor: pointer;
+  animation: kowen-in 200ms ease-out both;
+}
+
+.kowen-panel[data-closing] {
+  animation: kowen-out 220ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes kowen-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kowen-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.kowen-panel__card {
+  --box-px: 4px;
+
+  width: min(460px, 92vw);
+  max-height: 86dvh;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: var(--px-4) var(--px-6) var(--px-6);
+
+  background: #fff;
+  color: var(--twigo-ink);
+  border: var(--box-px) solid var(--twigo-ink);
+  border-radius: calc(var(--box-px) * 3);
+  box-shadow:
+    0 0 0 var(--box-px) #f5c542,
+    var(--px-3) var(--px-3) 0 0 rgb(0 0 0 / 0.55);
+  font-family: var(--font-body);
+  cursor: default;
+}
+
+.kowen-panel__title {
+  margin-bottom: var(--px-3);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.kowen-panel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--px-2);
+}
+
+.kowen-panel__row {
+  display: flex;
+  align-items: center;
+  gap: var(--px-3);
+  font-size: 1.05rem;
+}
+
+.kowen-panel__rank {
+  width: 2ch;
+  flex: none;
+  text-align: center;
+}
+
+.kowen-panel__avatar {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: var(--px);
+  image-rendering: pixelated;
+}
+
+.kowen-panel__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kowen-panel__kowens {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  flex: none;
+  color: #9a6b00;
+}
+
+.kowen-panel__coin {
+  width: 18px;
+  height: 18px;
+}
+
+.kowen-panel__kowens small {
+  font-size: 0.75em;
+  color: var(--color-text-dim);
+}
+
+.kowen-panel__hint {
+  margin-top: var(--px-4);
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kowen-panel,
+  .kowen-panel[data-closing] {
+    animation: none;
+  }
+}

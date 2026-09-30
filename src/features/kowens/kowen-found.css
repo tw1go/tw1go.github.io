@@ -1,0 +1,209 @@
+/* Pinned to the top of the screen, above everything including the
+   reveals — a find can turn up during one, and should not be lost under
+   it. Doesn't cover the room: the scene carries on behind it. */
+.kowen-found {
+  --box-px: 4px;
+
+  position: fixed;
+  top: var(--px-6);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 35;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--px-2);
+  width: min(440px, 92vw);
+  box-sizing: border-box;
+  padding: var(--px-8);
+
+  background: #fff;
+  color: var(--twigo-ink);
+  border: var(--box-px) solid var(--twigo-ink);
+  border-radius: calc(var(--box-px) * 3);
+  box-shadow:
+    0 0 0 var(--box-px) #f5c542,
+    var(--px-3) var(--px-3) 0 0 rgb(0 0 0 / 0.55);
+  font-family: var(--font-body);
+  text-align: center;
+
+  animation: kowen-found-in 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.kowen-found[data-closing] {
+  animation: kowen-found-out 260ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes kowen-found-in {
+  from {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes kowen-found-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+}
+
+/* The Kowen, held still, with pixel sparkles glinting round it. */
+.kowen-found__treasure {
+  position: relative;
+  margin-bottom: var(--px-2);
+}
+
+.kowen-found__coin {
+  display: block;
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 3px 0 rgb(0 0 0 / 0.3));
+}
+
+/* A four-point pixel star: two bars crossed, from one element, flickering
+   through sizes in whole steps like the room's other twinkles. */
+.kowen-found__sparkle {
+  --sp: calc(3px * var(--sp-size, 1));
+
+  position: absolute;
+  width: calc(var(--sp) * 5);
+  height: calc(var(--sp) * 5);
+  translate: -50% -50%;
+  /* Gold with a hard darker edge: on the panel's white a pale sparkle
+     simply disappears. */
+  background:
+    linear-gradient(#f5c542, #f5c542) center / var(--sp) 100% no-repeat,
+    linear-gradient(#f5c542, #f5c542) center / 100% var(--sp) no-repeat;
+  filter: drop-shadow(1px 0 0 #b7791f) drop-shadow(-1px 0 0 #b7791f) drop-shadow(0 1px 0 #b7791f)
+    drop-shadow(0 -1px 0 #b7791f);
+  opacity: 0;
+  animation: kowen-sparkle 1.75s steps(1, jump-end) infinite;
+}
+
+@keyframes kowen-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(0.7);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  42% {
+    opacity: 0.8;
+    transform: scale(0.6);
+  }
+  55% {
+    opacity: 0;
+  }
+}
+
+.kowen-found__title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: #9a6b00;
+}
+
+.kowen-found__how {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.kowen-found__step {
+  margin-top: var(--px-2);
+  font-size: 0.9rem;
+}
+
+.kowen-found__code {
+  display: flex;
+  align-items: center;
+  gap: var(--px-3);
+  padding: var(--px-2) var(--px-4);
+  border: 2px solid var(--twigo-ink);
+  border-radius: var(--px);
+  background: #111827;
+  color: var(--twigo-lime);
+  font: inherit;
+  cursor: pointer;
+}
+
+.kowen-found__code code {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.08em;
+}
+
+.kowen-found__code:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.kowen-found__copy {
+  font-size: 0.75rem;
+  color: #e5e7eb;
+}
+
+.kowen-found__timer {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.kowen-found__close {
+  margin-top: var(--px-2);
+  padding: var(--px) var(--px-4);
+  border: 2px solid var(--twigo-ink);
+  border-radius: var(--px);
+  background: #fff;
+  /* Buttons do not inherit the panel's colour; left alone it was the
+     page's white text on a white button. */
+  color: var(--twigo-ink);
+  font: inherit;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.kowen-found__code:focus-visible,
+.kowen-found__close:focus-visible {
+  outline: var(--px) solid var(--twigo-violet);
+  outline-offset: 2px;
+}
+
+/* Phones held sideways have little height to spare. */
+@media (max-height: 500px) {
+  .kowen-found {
+    top: var(--px-2);
+    gap: var(--px);
+    padding: var(--px-2) var(--px-4) var(--px-3);
+  }
+
+  .kowen-found__treasure {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kowen-found,
+  .kowen-found[data-closing],
+  .kowen-found__sparkle {
+    animation: none;
+  }
+
+  .kowen-found__sparkle {
+    opacity: 0.8;
+  }
+}
