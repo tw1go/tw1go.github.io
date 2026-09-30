@@ -95,7 +95,7 @@ export function KowenFound({ find, onClose }: { find: Find; onClose: () => void 
         {who} {how}.
       </p>
 
-      <p className="kowen-found__step">Claim it in twigo&rsquo;s Discord server:</p>
+      <p className="kowen-found__step">Claim it in the Mikazuki server:</p>
       <button type="button" className="kowen-found__code" onClick={copy} disabled={expired}>
         <code>{command}</code>
         <span className="kowen-found__copy">{copied ? 'Copied!' : 'Copy'}</span>

@@ -110,7 +110,7 @@ export function KowenBoard() {
             aria-label="Kowen leaderboard"
             onClick={(event) => event.stopPropagation()}
           >
-            <p className="kowen-panel__title">🏆 Richest in the server</p>
+            <p className="kowen-panel__title">🏆 Richest in Mikazuki</p>
             <ol className="kowen-panel__list">
               {rows.map((row) => (
                 <li key={row.rank} className="kowen-panel__row">
@@ -125,7 +125,7 @@ export function KowenBoard() {
               ))}
             </ol>
             <p className="kowen-panel__hint">
-              Earn them in twigo&rsquo;s Discord — or find one by poking around this room.
+              Earn them in the Mikazuki server — or find one by poking around this room.
             </p>
           </div>
         </div>,
